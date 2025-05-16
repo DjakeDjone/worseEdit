@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* tailwindcss typografie */
+@plugin "@tailwindcss/typography";
+
+
+/* tailwind css animated (compatible for tw 4.x */
+@import "tailwindcss";
+@import "tailwindcss-animated";
+
+/* tailwind css v4.x (animations */
+@import "tailwindcss";
+@import "tailwindcss-intersect";
