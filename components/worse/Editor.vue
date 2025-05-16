@@ -1,112 +1,3 @@
-<template>
-    
-    <div class="w-full no-animate">
-        <div v-if="editor"
-            class="inner-border flex flex-wrap gap-2 mb-2 sticky top-0 bg-white/20 backdrop-blur-lg z-10 rounded-md w-fit p-4">
-            <Dropdown :class="{ 'p-button-active': editor.isActive('heading', { level: 1 }) }" :options="[
-                { label: 'H1', command: () => editor.chain().focus().toggleHeading({ level: 1 }).run() },
-                { label: 'H2', command: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
-                { label: 'H3', command: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
-                { label: 'H4', command: () => editor.chain().focus().toggleHeading({ level: 4 }).run() },
-                { label: 'text', command: () => editor.chain().focus().setParagraph().run() },
-            ]" placeholder="Heading" optionLabel="label" @change="(e) => {
-                e.value.command()
-            }" />
-            <div class="flex gap-2">
-                <Button severity="secondary" @click="editor.chain().focus().toggleBold().run()"
-                    :disabled="!editor.can().chain().focus().toggleBold().run()" v-tooltip.bottom="'Bold'"
-                    :class="{ 'p-button-active': editor.isActive('bold') }">
-
-                    <Icon name="mdi:format-bold" />
-
-                </Button>
-                <Button severity="secondary" @click="editor.chain().focus().toggleItalic().run()"
-                    :disabled="!editor.can().chain().focus().toggleItalic().run()" v-tooltip.bottom="'Italic'"
-                    :class="{ 'p-button-active': editor.isActive('italic') }">
-
-                    <Icon name="mdi:format-italic" />
-
-                </Button>
-                <Button severity="secondary" @click="editor.chain().focus().toggleStrike().run()"
-                    :disabled="!editor.can().chain().focus().toggleStrike().run()" v-tooltip.bottom="'Strike Through'"
-                    :class="{ 'p-button-active': editor.isActive('strike') }">
-
-                    <Icon name="mdi:format-strikethrough" />
-
-                </Button>
-            </div>
-
-            <div class="flex gap-2 px-2">
-                <Button severity="secondary" @click="editor.chain().focus().toggleBulletList().run()"
-                    :class="{ 'p-button-active': editor.isActive('bulletList') }" v-tooltip.bottom="'Bullet List'">
-                    <Icon name="mdi:format-list-bulleted" />
-                </Button>
-                <Button severity="secondary" @click="editor.chain().focus().toggleOrderedList().run()"
-                    :class="{ 'p-button-active': editor.isActive('orderedList') }" v-tooltip.bottom="'Ordered List'">
-                    <Icon name="mdi:format-list-numbered" />
-                </Button>
-            </div>
-            <div>
-                <Button severity="secondary" @click="editor.chain().focus().toggleBlockquote().run()"
-                    :class="{ 'p-button-active': editor.isActive('blockquote') }" v-tooltip.bottom="'Blockquote'">
-                    <Icon name="mdi:format-quote-open" />
-                </Button>
-
-                <Button severity="secondary" @click="editor.chain().focus().setHorizontalRule().run()"
-                    v-tooltip.bottom="'Horizontal Rule'">
-                    <Icon name="mdi:minus" />
-                </Button>
-
-                <Button severity="secondary" @click="editor.chain().focus().setHardBreak().run()"
-                    v-tooltip.bottom="'Hard Break'">
-                    <Icon name="mdi:format-page-break" />
-                </Button>
-
-                <Button severity="secondary" @click="uploadImage()" v-tooltip.bottom="'Add Image'">
-                    <Icon name="mdi:image-plus" />
-                    <input type="file" accept="image/*" class="hidden" ref="imageInput" @change="handleImageUpload">
-                </Button>
-            </div>
-
-            <!-- Table controls -->
-            <div class="flex gap-2">
-                <Button severity="secondary"
-                    @click="editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()"
-                    v-tooltip.bottom="'Insert Table'">
-                    <Icon name="mdi:table" />
-                </Button>
-                <Dropdown v-if="editor.isActive('table')" :options="[
-                    { label: 'Add Column Before', command: () => editor.chain().focus().addColumnBefore().run() },
-                    { label: 'Add Column After', command: () => editor.chain().focus().addColumnAfter().run() },
-                    { label: 'Delete Column', command: () => editor.chain().focus().deleteColumn().run() },
-                    { label: 'Add Row Before', command: () => editor.chain().focus().addRowBefore().run() },
-                    { label: 'Add Row After', command: () => editor.chain().focus().addRowAfter().run() },
-                    { label: 'Delete Row', command: () => editor.chain().focus().deleteRow().run() },
-                    { label: 'Delete Table', command: () => editor.chain().focus().deleteTable().run() }
-                ]" placeholder="Table Options" optionLabel="label" @change="(e) => {
-                    e.value.command()
-                }">
-                    <template #value>
-                        <span>Table Options</span>
-                    </template>
-                </Dropdown>
-            </div>
-
-            <ButtonGroup class="rounded-full">
-                <Button severity="secondary" @click="editor.chain().focus().undo().run()"
-                    :disabled="!editor.can().chain().focus().undo().run()" v-tooltip.bottom="'Undo'">
-                    <Icon name="mdi:undo" />
-                </Button>
-                <Button severity="secondary" @click="editor.chain().focus().redo().run()"
-                    :disabled="!editor.can().chain().focus().redo().run()" v-tooltip.bottom="'Redo'">
-                    <Icon name="mdi:redo" />
-                </Button>
-            </ButtonGroup>
-        </div>
-        <TiptapEditorContent :editor="editor" class="border-y border-black w-full *:w-full" />
-    </div>
-
-</template>
 <script setup>
 import { Image } from '@tiptap/extension-image'
 import { ImageResize } from 'tiptap-extension-resize-image';
@@ -168,18 +59,128 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style scoped>
-/* reset margin */
-h1,
-h2 {
-    margin: 0 !important;
-}
-</style>
+<template>
+    <div class="w-full no-animate">
+        <div v-if="editor"
+            class="inner-border flex flex-wrap gap-2 mb-2 sticky top-0 bg-white/20 backdrop-blur-lg z-10 rounded-md w-fit p-4">
+            <Dropdown :class="{ 'p-button-active': editor.isActive('heading', { level: 1 }) }" :options="[
+                { label: 'H1', command: () => editor.chain().focus().toggleHeading({ level: 1 }).run() },
+                { label: 'H2', command: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
+                { label: 'H3', command: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
+                { label: 'H4', command: () => editor.chain().focus().toggleHeading({ level: 4 }).run() },
+                { label: 'text', command: () => editor.chain().focus().setParagraph().run() },
+            ]" placeholder="Heading" optionLabel="label" @change="(e) => {
+                e.value.command()
+            }" />
+            <div class="flex gap-2">
+                <Button severity="secondary" @click="editor.chain().focus().toggleBold().run()"
+                    :disabled="!editor.can().chain().focus().toggleBold().run()" v-tooltip.bottom="'Bold'"
+                    :class="{ 'p-button-active': editor.isActive('bold') }">
+
+                    <Icon name="mdi:format-bold" />
+
+                </Button>
+                <Button severity="secondary" @click="editor.chain().focus().toggleItalic().run()"
+                    :disabled="!editor.can().chain().focus().toggleItalic().run()" v-tooltip.bottom="'Italic'"
+                    :class="{ 'p-button-active': editor.isActive('italic') }">
+
+                    <Icon name="mdi:format-italic" />
+
+                </Button>
+                <Button severity="secondary" @click="editor.chain().focus().toggleStrike().run()"
+                    :disabled="!editor.can().chain().focus().toggleStrike().run()" v-tooltip.bottom="'Strike Through'"
+                    :class="{ 'p-button-active': editor.isActive('strike') }">
+
+                    <Icon name="mdi:format-strikethrough" />
+
+                </Button>
+            </div>
+
+            <div class="flex gap-2 px-2">
+                <Button severity="secondary" @click="editor.chain().focus().toggleBulletList().run()"
+                    :class="{ 'p-button-active': editor.isActive('bulletList') }" v-tooltip.bottom="'Bullet List'">
+                    <Icon name="mdi:format-list-bulleted" />
+                </Button>
+                <Button severity="secondary" @click="editor.chain().focus().toggleOrderedList().run()"
+                    :class="{ 'p-button-active': editor.isActive('orderedList') }" v-tooltip.bottom="'Ordered List'">
+                    <Icon name="mdi:format-list-numbered" />
+                </Button>
+            </div>
+            <div class="flex gap-2 px-2">
+                <Button severity="secondary" @click="editor.chain().focus().toggleBlockquote().run()"
+                    :class="{ 'p-button-active': editor.isActive('blockquote') }" v-tooltip.bottom="'Blockquote'">
+                    <Icon name="mdi:format-quote-open" />
+                </Button>
+
+                <Button severity="secondary" @click="editor.chain().focus().setHorizontalRule().run()"
+                    v-tooltip.bottom="'Horizontal Rule'">
+                    <Icon name="mdi:minus" />
+                </Button>
+
+                <Button severity="secondary" @click="editor.chain().focus().setHardBreak().run()"
+                    v-tooltip.bottom="'Hard Break'">
+                    <Icon name="mdi:format-page-break" />
+                </Button>
+
+                <Button severity="secondary" @click="uploadImage()" v-tooltip.bottom="'Add Image'">
+                    <Icon name="mdi:image-plus" />
+                    <input type="file" accept="image/*" class="hidden" ref="imageInput" @change="handleImageUpload">
+                </Button>
+            </div>
+
+            <!-- Table controls -->
+            <div class="flex gap-2">
+                <Button severity="secondary"
+                    @click="editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()"
+                    v-tooltip.bottom="'Insert Table'">
+                    <Icon name="mdi:table" />
+                </Button>
+                <Dropdown v-if="editor.isActive('table')" :options="[
+                    { label: 'Add Column Before', command: () => editor.chain().focus().addColumnBefore().run() },
+                    { label: 'Add Column After', command: () => editor.chain().focus().addColumnAfter().run() },
+                    { label: 'Delete Column', command: () => editor.chain().focus().deleteColumn().run() },
+                    { label: 'Add Row Before', command: () => editor.chain().focus().addRowBefore().run() },
+                    { label: 'Add Row After', command: () => editor.chain().focus().addRowAfter().run() },
+                    { label: 'Delete Row', command: () => editor.chain().focus().deleteRow().run() },
+                    { label: 'Delete Table', command: () => editor.chain().focus().deleteTable().run() }
+                ]" placeholder="Table Options" optionLabel="label" @change="(e) => {
+                    e.value.command()
+                }">
+                    <template #value>
+                        <span>Table Options</span>
+                    </template>
+                </Dropdown>
+            </div>
+
+            <ButtonGroup class="rounded-full">
+                <Button severity="secondary" @click="editor.chain().focus().undo().run()"
+                    :disabled="!editor.can().chain().focus().undo().run()" v-tooltip.bottom="'Undo'">
+                    <Icon name="mdi:undo" />
+                </Button>
+                <Button severity="secondary" @click="editor.chain().focus().redo().run()"
+                    :disabled="!editor.can().chain().focus().redo().run()" v-tooltip.bottom="'Redo'">
+                    <Icon name="mdi:redo" />
+                </Button>
+            </ButtonGroup>
+        </div>
+        <TiptapEditorContent :editor="editor" class="prose max-w-[100vw] border-y border-black w-full *:w-full" />
+    </div>
+
+</template>
 
 <style>
-.ProseMirror:focus {
+/* reset margin */
+.prose h1,
+h2,
+p {
+    margin: 0 !important;
+}
+
+.ProseMirror,
+.ProseMirror-focused {
     outline: none !important;
     max-width: unset !important;
+    border: none !important;
 }
 
 .prose img[src*="base64"] {
@@ -192,6 +193,7 @@ h2 {
     border-right: 1px solid #00000059;
     display: flex;
     align-items: center;
+    padding-right: 0.5rem;
 }
 
 .inner-border>*:last-child {
