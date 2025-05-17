@@ -25,8 +25,20 @@ export default defineNuxtConfig({
   nitro: {
     experimental: {
       websocket: true
+    },
+    storage: {
+      db: {
+        driver: 'vercel-kv',
+      }
+    },
+    devStorage: {
+      db: {
+        driver: 'fs',
+        base: './data/kv',
+      }
     }
   },
+
   postcss: {
     plugins: {
       '@tailwindcss/postcss': {}

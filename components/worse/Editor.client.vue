@@ -10,6 +10,35 @@ import { Collaboration } from '@tiptap/extension-collaboration'
 import { CollaborationCursor } from '@tiptap/extension-collaboration-cursor'
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
+import { Node, mergeAttributes } from '@tiptap/core'
+
+// Custom Page Break Extension
+const PageBreakNode = Node.create({
+    name: 'pageBreak',
+    group: 'block',
+    atom: true,
+
+    parseHTML() {
+        return [
+            {
+                tag: 'hr[data-type="page-break"]',
+            },
+        ]
+    },
+
+    renderHTML({ HTMLAttributes }) {
+        // Note: Add styling for '.page-break-indicator' in your editor.css
+        return ['hr', mergeAttributes(HTMLAttributes, { 'data-type': 'page-break', class: 'page-break-indicator' })]
+    },
+
+    addCommands() {
+        return {
+            setPageBreak: () => ({ commands }) => {
+                return commands.insertContent({ type: this.name })
+            },
+        }
+    },
+})
 
 const modelValue = defineModel()
 const props = defineProps({
@@ -74,7 +103,8 @@ const editor = useEditor({
         }),
         TableRow,
         TableHeader,
-        TableCell
+        TableCell,
+        PageBreakNode, // Add the custom extension here
     ],
     onUpdate({ editor }) {
         modelValue.value = editor.getHTML()
@@ -173,11 +203,34 @@ onBeforeUnmount(() => {
                         <Icon name="mdi:format-page-break" />
                     </Button>
 
+                    <Button severity="secondary" @click="editor.chain().focus().setPageBreak().run()"
+                        v-tooltip.bottom="'Insert Page Break'">
+                        <Icon name="mdi:file-document-outline" /> <!-- Example icon, choose one you like -->
+                    </Button>
+
                     <Button severity="secondary" @click="uploadImage()" v-tooltip.bottom="'Add Image'">
                         <Icon name="mdi:image-plus" />
                         <input type="file" accept="image/*" class="hidden" ref="imageInput" @change="handleImageUpload">
                     </Button>
                 </div>
+
+                <!-- <ButtonGroup>
+                    <Button severity="secondary" @click="editor.chain().focus().setTextAlign('left').run()"
+                        :class="{ 'p-button-active': editor.isActive({ textAlign: 'left' }) }"
+                        v-tooltip.bottom="'Align Left'">
+                        <Icon name="mdi:format-align-left" />
+                    </Button>
+                    <Button severity="secondary" @click="editor.chain().focus().setTextAlign('center').run()"
+                        :class="{ 'p-button-active': editor.isActive({ textAlign: 'center' }) }"
+                        v-tooltip.bottom="'Align Center'">
+                        <Icon name="mdi:format-align-center" />
+                    </Button>
+                    <Button severity="secondary" @click="editor.chain().focus().setTextAlign('right').run()"
+                        :class="{ 'p-button-active': editor.isActive({ textAlign: 'right' }) }"
+                        v-tooltip.bottom="'Align Right'">
+                        <Icon name="mdi:format-align-right" />
+                    </Button>
+                </ButtonGroup> -->
 
                 <!-- Table controls -->
                 <div class="flex gap-2">
@@ -215,7 +268,44 @@ onBeforeUnmount(() => {
                 </ButtonGroup>
             </div>
         </slot>
-        <TiptapEditorContent :editor="editor" class="prose max-w-[100vw] border-y border-black w-full *:w-full" />
+        <div class="w-full flex justify-center">
+            <Card class="px-[4rem] w-[793px]">
+                <template #header>
+                    <div class="h-10 flex items-center justify-between">
+
+                    </div>
+                </template>
+                <template #content>
+                    <TiptapEditorContent :editor="editor" class="prose max-w-[100vw] *:w-full" />
+                </template>
+            </Card>
+        </div>
     </div>
 
 </template>
+
+<style>
+.page-break-indicator {
+    border: none;
+    /* border-top: 1px dashed #000; */
+    /* Change this to your desired style */
+    margin: 20px 0;
+    /* Adjust spacing as needed */
+    text-align: center;
+    padding: 1rem 0;
+    width: 793px;
+    /* TODO: replace with variable */
+    position: relative;
+    left: -5.3rem;
+    --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+    /* box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow); */
+
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.2), 0 -2px 2px -1px rgba(0, 0, 0, 0.2);
+}
+
+.page {
+    height: 100vh;
+    /* Replace with number */
+
+}
+</style>

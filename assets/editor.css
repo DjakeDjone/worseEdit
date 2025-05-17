@@ -66,6 +66,15 @@ p {
     pointer-events: none;
 }
 
+.ProseMirror img {
+    /* allow drag */
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+}
+
 .ProseMirror table .column-resize-handle {
     position: absolute;
     right: -2px;
@@ -87,3 +96,4 @@ p {
     line-height: 1rem;
 
 }
+

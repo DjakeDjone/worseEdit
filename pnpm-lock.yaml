@@ -71,6 +71,9 @@ importers:
       tiptap-extension-resize-image:
         specifier: ^1.2.2
         version: 1.2.2(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))(@tiptap/extension-image@2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0)))(@tiptap/pm@2.12.0)
+      tiptap-pagination-breaks:
+        specifier: ^1.0.3
+        version: 1.0.3(@tiptap/pm@2.12.0)
       utils:
         specifier: link:y-websocket/bin/utils
         version: link:y-websocket/bin/utils
@@ -4116,6 +4119,9 @@ packages:
       '@tiptap/core': ^2.0.0
       '@tiptap/extension-image': ^2.0.0
       '@tiptap/pm': ^2.0.0
+
+  tiptap-pagination-breaks@1.0.3:
+    resolution: {integrity: sha512-t7Q9lG40Me73WHxHxKu4UG16VLSF9IcV2uoUSL86oZxv1OZxexlG0gTrUBxa8RMB+lPq2ienb+s9dlL2djvjmg==}
 
   tmp-promise@3.0.3:
     resolution: {integrity: sha512-RwM7MoPojPxsOBYnyd2hy0bxtIlVrihNs9pj5SUvY8Zz1sQcQG2tG1hSr8PDxfgEB8RNKDhqbIlroIarSNDNsQ==}
@@ -9150,6 +9156,13 @@ snapshots:
       '@tiptap/core': 2.12.0(@tiptap/pm@2.12.0)
       '@tiptap/extension-image': 2.12.0(@tiptap/core@2.12.0(@tiptap/pm@2.12.0))
       '@tiptap/pm': 2.12.0
+
+  tiptap-pagination-breaks@1.0.3(@tiptap/pm@2.12.0):
+    dependencies:
+      '@tiptap/core': 2.12.0(@tiptap/pm@2.12.0)
+      prosemirror-state: 1.4.3
+    transitivePeerDependencies:
+      - '@tiptap/pm'
 
   tmp-promise@3.0.3:
     dependencies:

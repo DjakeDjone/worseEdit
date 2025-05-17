@@ -31,6 +31,7 @@
     "tailwindcss-animated": "^2.0.0",
     "tailwindcss-intersect": "^2.2.0",
     "tiptap-extension-resize-image": "^1.2.2",
+    "tiptap-pagination-breaks": "^1.0.3",
     "utils": "link:y-websocket/bin/utils",
     "vue": "^3.5.14",
     "vue-router": "^4.5.1",

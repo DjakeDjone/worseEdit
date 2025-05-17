@@ -255,7 +255,7 @@ export default defineWebSocketHandler({
                     return;
                 }
             }
-            console.info(`[ws] Document ${roomName} found:`, dbDoc.content);
+            // console.info(`[ws] Document ${roomName} found:`, dbDoc.content);
 
             // If authorization passed, proceed with setting up Yjs doc connection
             const doc = getYDoc(roomName);

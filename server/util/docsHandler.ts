@@ -27,7 +27,7 @@ export const useDocsHandler = () => {
 
     const getDoc = async (id: string) => {
         const doc = await db.getItem<Doc>(tableName + ":" + id);
-        console.log(`getDoc: ${id}: ${doc?.content}`);
+        // console.log(`getDoc: ${id}: ${doc?.content}`);
         // set yjs
         if (doc && doc.yjs) {
             doc.yjs = new Y.Doc();
