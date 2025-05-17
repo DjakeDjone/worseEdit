@@ -26,17 +26,18 @@ export default defineNuxtConfig({
     experimental: {
       websocket: true
     },
-    storage: {
-      db: {
-        driver: 'vercel-kv',
-      }
-    },
-    devStorage: {
-      db: {
-        driver: 'fs',
-        base: './data/kv',
-      }
-    }
+    // storage: {
+    //   db: {
+    //     driver: 'vercel-blob',
+        
+    //   }
+    // },
+    // devStorage: {
+    //   db: {
+    //     driver: 'fs',
+    //     base: './data/kv',
+    //   }
+    // }
   },
 
   postcss: {

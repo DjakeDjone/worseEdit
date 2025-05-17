@@ -61,7 +61,8 @@ const imageInput = ref(null);
 const imageWidth = ref('50%');
 
 const doc = new Y.Doc()
-const provider = new WebsocketProvider(`ws://${location.host}/api/editor/live`, props.fileName, doc)
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'; // TODO: replace with nuxt directive
+const provider = new WebsocketProvider(`${protocol}//${location.host}/api/editor/live`, props.fileName, doc)
 // const provider = new WebsocketProvider(`ws://localhost:1234`, 'init', doc)
 
 provider.on('status', (event) => {
