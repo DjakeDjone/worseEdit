@@ -13,6 +13,7 @@
     "@formkit/auto-animate": "0.8.2",
     "@primevue/forms": "^4.3.4",
     "@primevue/themes": "^4.3.4",
+    "@sidebase/nuxt-auth": "0.10.1",
     "@tailwindcss/vite": "^4.1.7",
     "@tiptap/extension-collaboration": "^2.12.0",
     "@tiptap/extension-collaboration-cursor": "^2.12.0",
