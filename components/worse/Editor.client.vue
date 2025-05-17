@@ -17,8 +17,17 @@ const imageInput = ref(null);
 const imageWidth = ref('50%');
 
 const doc = new Y.Doc()
-// const provider = new WebsocketProvider(`ws://${location.host}/api/editor/live`, 'init', doc)
-const provider = new WebsocketProvider(`ws://localhost:1234`, 'init', doc)
+const provider = new WebsocketProvider(`ws://${location.host}/api/editor/live`, 'init', doc)
+// const provider = new WebsocketProvider(`ws://localhost:1234`, 'init', doc)
+
+const generateBeautifulColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
 
 const editor = useEditor({
     content: modelValue.value || "<p>I'm running Tiptap with Vue.js. 🎉</p>",
@@ -35,7 +44,7 @@ const editor = useEditor({
             provider: provider,
             user: {
                 name: 'User ' + Math.floor(Math.random() * 100),
-                color: '#'+Math.floor(Math.random()*16777215).toString(16)
+                color: generateBeautifulColor(),
             },
         }),
         ImageResize,
@@ -274,10 +283,12 @@ p {
     z-index: 20;
 }
 
+/* collaboration */
 .collaboration-cursor__label {
     position: absolute;
-    background-color: rgb(55, 246, 7) !important;
+    /* left: -5rem; */
     border-radius: 0 1rem 1rem 1rem;
     padding: .5rem;
+    
 }
 </style>
