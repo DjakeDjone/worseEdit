@@ -15,18 +15,7 @@ const fileName = ref("public");
             <h2 class="text-xl">Welcome {{ user ? user.name : 'Developer' }}!</h2>
         </div>
 
-        <InputText
-            v-model="fileName"
-            label="File Name"
-            placeholder="Enter file name"
-            class="mb-4"
-            :disabled="!user"
-        />
-        <textarea
-            v-model="content"
-            label="Content"
-            placeholder="Enter content"
-            class="mb-4"></textarea>
+        
         <div class="border rounded-lg p-4 bg-white shadow-sm">
             <ClientOnly>
                 <WorseEditor v-model="content" :fileName="fileName" :user="toYUser(user?user:fakeUser)" />

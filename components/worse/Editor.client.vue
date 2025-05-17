@@ -1,4 +1,5 @@
 <script setup>
+import "@/assets/editor.css";
 import { Image } from '@tiptap/extension-image'
 import { ImageResize } from 'tiptap-extension-resize-image';
 import Table from '@tiptap/extension-table'
@@ -44,7 +45,7 @@ provider.on('status', (event) => {
 
 
 const editor = useEditor({
-    // content: modelValue.value || "<p>I'm running Tiptap with Vue.js. 🎉</p>",
+    content: modelValue.value || "<p>I'm running Tiptap with Vue.js. 🎉</p>",
     extensions: [
         TiptapStarterKit.configure({
             // The Collaboration extension comes with its own history handling
@@ -218,95 +219,3 @@ onBeforeUnmount(() => {
     </div>
 
 </template>
-
-<style>
-/* reset margin */
-.prose h1,
-h2,
-p {
-    margin: 0 !important;
-}
-
-.ProseMirror,
-.ProseMirror-focused {
-    outline: none !important;
-    max-width: unset !important;
-    border: none !important;
-}
-
-.prose img[src*="base64"] {
-    max-width: 100%;
-    height: auto;
-    border-radius: 1rem;
-}
-
-.inner-border>* {
-    border-right: 1px solid #00000059;
-    display: flex;
-    align-items: center;
-    padding-right: 0.5rem;
-}
-
-.inner-border>*:last-child {
-    border-right: none;
-}
-
-
-/* Table styles */
-.ProseMirror table {
-    border-collapse: collapse;
-    table-layout: fixed;
-    width: 100%;
-    margin: 0;
-    overflow: hidden;
-}
-
-.ProseMirror table td,
-.ProseMirror table th {
-    min-width: 1em;
-    border: 1px solid #ddd;
-    padding: 3px 5px;
-    vertical-align: top;
-    box-sizing: border-box;
-    position: relative;
-}
-
-.ProseMirror table th {
-    font-weight: bold;
-    background-color: hsl(var(--primary-100));
-}
-
-.ProseMirror table .selectedCell:after {
-    z-index: 2;
-    position: absolute;
-    content: "";
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background: rgba(200, 200, 255, 0.4);
-    pointer-events: none;
-}
-
-.ProseMirror table .column-resize-handle {
-    position: absolute;
-    right: -2px;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background-color: #adf;
-    cursor: col-resize;
-    z-index: 20;
-}
-
-/* collaboration */
-.collaboration-cursor__label {
-    position: absolute;
-    /* left: -5rem; */
-    border-radius: 0 1rem 1rem 1rem;
-    padding: .5rem;
-    font-size: 0.8rem;
-    line-height: 1rem;
-
-}
-</style>

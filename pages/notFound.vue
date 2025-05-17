@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { NuxtLink } from '#components';
+
 
 </script>
 
 <template>
-    <main>
-        <h1>404 - Page Not Found</h1>
+    <UiPage center class="flex-col">
+        <h1 class="text-center text-4xl mb-4">404 - Page Not Found</h1>
         <p>The page you are looking for does not exist.</p>
-        <nuxt-link to="/">Go back to home</nuxt-link>
-    </main>
+        <NuxtLink to="/" class="text-blue-500 hover:underline">Go back to home</NuxtLink>
+    </UiPage>
 </template>
