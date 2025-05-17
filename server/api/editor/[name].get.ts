@@ -1,9 +1,7 @@
-import { DocData, DocMeta } from "~/server/model/doc";
 import { useDocsHandler } from "~/server/util/docsHandler";
 import { useUsersHandler } from "~/server/util/userHandler";
 
 export default defineEventHandler(async (event) => {
-    const body = await readBody<DocMeta>(event);
     const { getUserByCookie } = useUsersHandler();
     const user = await getUserByCookie(event);
     if (!user) {
@@ -11,13 +9,20 @@ export default defineEventHandler(async (event) => {
         return;
     }
 
-    const docsHandler = useDocsHandler();
-    const doc = await docsHandler.createDoc(body, user);
-    if (!doc) {
-        setResponseStatus(event, 500);
+    const { getDoc } = useDocsHandler();
+    const docName = getRouterParam(event, "name");
+    if (!docName) {
+        setResponseStatus(event, 400);
         return;
     }
+    const doc = await getDoc(docName);
+    if (!doc) {
+        setResponseStatus(event, 404);
+        return;
+    }
+    // check if user has permission to access the doc
+    await useDocsHandler().checkDocPermissions(doc, user);
+
     setResponseStatus(event, 200);
-    // setHeader(event, "Location", `/api/editor/${doc.id}`);
     return doc;
 });

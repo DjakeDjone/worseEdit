@@ -1,15 +1,19 @@
 import * as Y from 'yjs'
 import { DbEntry } from './dbEntry';
 
-export type DocData = {
+export type DocMeta = {
     name: string;
+}
+
+export type DocData = DocMeta & {
     content: string;
-    yjs: Y.Doc;
+    yjs?: Y.Doc;
 
     // security
     users: DocPermissionData[]; // user ids
+    public?: boolean; // if the document is public
 
-    sharingLink: string; // link to share the document
+    sharingLink?: string; // link to share the document
 };
 export type Doc = DbEntry & DocData;
 

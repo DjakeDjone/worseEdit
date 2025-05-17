@@ -126,12 +126,22 @@ export default defineWebSocketHandler({
         const { getDoc: getDbDoc, checkDocPermissions } = useDocsHandler(); // Renamed to avoid conflict
 
         try {
-            // @ts-ignore: peer.event is available in crossws from H3Event
-            const user = await getUserByCookie(peer.event);
-            if (!user) {
-                console.error('[ws] Unauthorized: User not found for peer:', peer.id);
-                peer.close(1008, 'Unauthorized: User not found'); // 1008: Policy Violation
-                return;
+            let user = null; // Initialize user as null
+
+            // @ts-ignore: peer.event is available in crossws from H3Event, but might be undefined
+            if (peer.event && typeof peer.event === 'object') {
+                try {
+                    // @ts-ignore: peer.event is available in crossws from H3Event
+                    user = await getUserByCookie(peer.event);
+                } catch (e: any) {
+                    // Log error from getUserByCookie if it throws (e.g. 'Cannot read properties of undefined (reading 'node')')
+                    // Treat as anonymous and proceed to check document permissions (e.g. public access)
+                    console.warn(`[ws] Error during getUserByCookie for peer ${peer.id} (room: ${roomName}): ${e.message}. Proceeding as anonymous.`);
+                    // user remains null
+                }
+            } else {
+                console.warn(`[ws] peer.event is not available for peer ${peer.id} (room: ${roomName}). Proceeding as anonymous for cookie authentication.`);
+                // user remains null
             }
 
             const dbDoc = await getDbDoc(roomName);
@@ -141,33 +151,46 @@ export default defineWebSocketHandler({
                 return;
             }
 
-            await checkDocPermissions(dbDoc, user); // This will throw if no permission
+            if (user) {
+                await checkDocPermissions(dbDoc, user); // This will throw if no permission
+                console.log(`[ws] User ${user.id} authorized for document ${roomName}`);
+            } else {
+                // User is null (no cookie, peer.event missing/problematic, or getUserByCookie failed)
+                // Check if the document is public
+                if (dbDoc.public) {
+                    console.log(`[ws] Document ${roomName} is public, allowing anonymous access for peer:`, peer.id);
+                } else {
+                    console.error(`[ws] Unauthorized: Document ${roomName} is not public and no authenticated user found for peer:`, peer.id);
+                    peer.close(1008, `Unauthorized: Document ${roomName} requires authentication.`);
+                    return;
+                }
+            }
 
-            console.log(`[ws] User ${user.id} authorized for document ${roomName}`);
+            // If authorization passed, proceed with setting up Yjs doc connection
+            const doc = getYDoc(roomName);
+            doc.conns.set(peer, new Set());
 
+            // Send sync step 1 (initial sync)
+            const encoder = encoding.createEncoder();
+            encoding.writeVarUint(encoder, messageSync);
+            syncProtocol.writeSyncStep1(encoder, doc);
+            peer.send(encoding.toUint8Array(encoder));
+
+            // Send awareness update (initial awareness state)
+            const awarenessStates = doc.awareness.getStates();
+            if (awarenessStates.size > 0) {
+                const awarenessEncoder = encoding.createEncoder();
+                encoding.writeVarUint(awarenessEncoder, messageAwareness);
+                encoding.writeVarUint8Array(awarenessEncoder, awarenessProtocol.encodeAwarenessUpdate(doc.awareness, Array.from(awarenessStates.keys())));
+                peer.send(encoding.toUint8Array(awarenessEncoder));
+            }
         } catch (error: any) {
-            console.error('[ws] Authorization error:', error.message, 'for peer:', peer.id, 'room:', roomName);
-            peer.close(1008, `Unauthorized: ${error.message}`); // 1008: Policy Violation
+            // This catch block handles errors from getDbDoc, checkDocPermissions (if user was present and denied),
+            // or other unexpected critical errors in the setup.
+            console.error(`[ws] Authorization or setup error for peer ${peer.id} (room: ${roomName}): ${error.message}`);
+            const closeMessage = error.message ? `Unauthorized: ${error.message}` : 'Unauthorized: Connection setup failed';
+            peer.close(1008, closeMessage); // 1008: Policy Violation
             return;
-        }
-
-
-        const doc = getYDoc(roomName)
-        doc.conns.set(peer, new Set())
-
-        // Send sync step 1 (initial sync)
-        const encoder = encoding.createEncoder()
-        encoding.writeVarUint(encoder, messageSync)
-        syncProtocol.writeSyncStep1(encoder, doc)
-        peer.send(encoding.toUint8Array(encoder))
-
-        // Send awareness update (initial awareness state)
-        const awarenessStates = doc.awareness.getStates()
-        if (awarenessStates.size > 0) {
-            const awarenessEncoder = encoding.createEncoder()
-            encoding.writeVarUint(awarenessEncoder, messageAwareness)
-            encoding.writeVarUint8Array(awarenessEncoder, awarenessProtocol.encodeAwarenessUpdate(doc.awareness, Array.from(awarenessStates.keys())))
-            peer.send(encoding.toUint8Array(awarenessEncoder))
         }
     },
 

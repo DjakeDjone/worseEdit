@@ -1,4 +1,4 @@
-import { Doc, DocData, DocPermission } from "../model/doc";
+import { Doc, DocData, DocMeta, DocPermission } from "../model/doc";
 import { User } from "../model/user";
 import { generateDbEntry } from "../model/dbEntry";
 
@@ -8,7 +8,7 @@ export const useDocsHandler = () => {
     const db = useStorage("data");
 
     const getDoc = async (id: string) => {
-        const doc = await db.getItem<Doc>(tableName + id);
+        const doc = await db.getItem<Doc>(tableName + ":" + id);
         return doc;
     }
 
@@ -24,15 +24,25 @@ export const useDocsHandler = () => {
 
     /// create a new doc
     /// @param doc doc object
+    /// @param owner user object, if not provided, doc will be public
     /// @returns doc object
     /// @throws Error if doc already exists
-    const createDoc = async (doc: DocData, owner: User) => {
+    const createDoc = async (doc: DocMeta, owner?: User) => {
         const id = crypto.randomUUID();
         const newDoc = generateDbEntry<DocData>(id, {
             ...doc,
-            users: [{ userId: owner.id, permission: DocPermission.ADMIN }],
+            content: "",
+            users: [],
         });
-        await db.setItem(tableName + id, newDoc);
+        if (owner) {
+            newDoc.users.push({
+                userId: owner.id,
+                permission: DocPermission.ADMIN,
+            });
+        } else {
+            newDoc.public = true;
+        }
+        await db.setItem(tableName + ":" + id, newDoc);
         return newDoc;
     }
 
@@ -48,7 +58,7 @@ export const useDocsHandler = () => {
             throw new Error("Doc does not exist");
         }
         const updatedDoc = { ...existingDoc, ...doc, updatedAt: new Date() };
-        await db.setItem(tableName + id, updatedDoc);
+        await db.setItem(tableName + ":" + id, updatedDoc);
         return updatedDoc;
     }
 
@@ -61,7 +71,7 @@ export const useDocsHandler = () => {
         if (!existingDoc) {
             throw new Error("Doc does not exist");
         }
-        await db.removeItem(tableName + id);
+        await db.removeItem(tableName + ":" + id);
         return true;
     }
 

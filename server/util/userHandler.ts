@@ -97,6 +97,8 @@ export const useUsersHandler = () => {
         const [id, token] = authToken.split(":");
         const user = await db.getItem<User>(":" + id);
         if (!user) {
+            // remove the cookie
+            deleteCookie(event, "auth-token");
             return null;
         }
         const validToken = user.authTokens?.find((t) => t.token === token);
@@ -107,6 +109,7 @@ export const useUsersHandler = () => {
             // token is expired
             user.authTokens = user.authTokens?.filter((t) => t.token !== token);
             await db.setItem(id, user);
+            deleteCookie(event, "auth-token");
             return null;
         }
         return user;
