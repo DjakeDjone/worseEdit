@@ -11,6 +11,8 @@ export type UserData = {
     name: string;
     token: string;
     authTokens?: AuthToken[];
+    // 
+    docs?: String[]; // doc ids, great for searching etc. !redundant!
 }
 
 export type User = UserData & DbEntry;

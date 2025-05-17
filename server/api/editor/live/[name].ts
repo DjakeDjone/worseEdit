@@ -8,6 +8,9 @@ import * as encoding from 'lib0/encoding'
 import * as decoding from 'lib0/decoding'
 import * as map from 'lib0/map'
 
+import { useUsersHandler } from '~/server/util/userHandler'
+import { useDocsHandler } from '~/server/util/docsHandler'
+
 const messageSync = 0
 const messageAwareness = 1
 
@@ -116,13 +119,38 @@ export const getYDocName = (peer: Peer<AdapterInternal>) => {
 
 
 export default defineWebSocketHandler({
-    open(peer) {
+    async open(peer) {
         console.log('[ws] open', peer)
-        // Extract roomName from peer.url (e.g., /<roomName>)
-        // Make sure to handle potential query parameters if any
-        // const urlParts = peer.url.split('?')[0].split('/')
-        // const roomName = urlParts[urlParts.length -1] || 'default-room' // Fallback room name
         const roomName = getYDocName(peer);
+        const { getUserByCookie } = useUsersHandler();
+        const { getDoc: getDbDoc, checkDocPermissions } = useDocsHandler(); // Renamed to avoid conflict
+
+        try {
+            // @ts-ignore: peer.event is available in crossws from H3Event
+            const user = await getUserByCookie(peer.event);
+            if (!user) {
+                console.error('[ws] Unauthorized: User not found for peer:', peer.id);
+                peer.close(1008, 'Unauthorized: User not found'); // 1008: Policy Violation
+                return;
+            }
+
+            const dbDoc = await getDbDoc(roomName);
+            if (!dbDoc) {
+                console.error(`[ws] Unauthorized: Document ${roomName} not found for peer:`, peer.id);
+                peer.close(1008, `Unauthorized: Document ${roomName} not found`);
+                return;
+            }
+
+            await checkDocPermissions(dbDoc, user); // This will throw if no permission
+
+            console.log(`[ws] User ${user.id} authorized for document ${roomName}`);
+
+        } catch (error: any) {
+            console.error('[ws] Authorization error:', error.message, 'for peer:', peer.id, 'room:', roomName);
+            peer.close(1008, `Unauthorized: ${error.message}`); // 1008: Policy Violation
+            return;
+        }
+
 
         const doc = getYDoc(roomName)
         doc.conns.set(peer, new Set())

@@ -4,14 +4,15 @@ import { User, UserData } from "../model/user";
 
 
 export const useUsersHandler = () => {
+    const tableName = "users";
     const db = useStorage("data"); // simple file kv
     const userCache = new Map<string, string>(); // username -> id
 
     const init = async () => {
         // load all users from db
-        const users = await db.getKeys("users");
-        for (const userId of users) {
-            const user = await db.getItem<User>("users:"+userId);
+        const userIds = await db.getKeys(tableName);
+        for (const userId of userIds) {
+            const user = await db.getItem<User>(tableName + userId);
             if (user) {
                 userCache.set(user.name, userId);
             }
@@ -19,7 +20,7 @@ export const useUsersHandler = () => {
     }
 
     const getUser = async (id: string, token: string) => {
-        const user = await db.getItem<User>("users:"+id);
+        const user = await db.getItem<User>(tableName + id);
         if (user && user.token === token) {
             return user;
         }
@@ -42,6 +43,7 @@ export const useUsersHandler = () => {
         const id = crypto.randomUUID();
         const usr = generateDbEntry<UserData>(id, user);
         await db.setItem(id, usr);
+        userCache.set(usr.name, id);
         return usr;
     }
 
@@ -52,7 +54,7 @@ export const useUsersHandler = () => {
     /// @throws Error if user does not exist or token is invalid
     const updateUser = async (id: string, user: User) => {
         // check if user exists
-        const existingUser = await db.getItem<User>("users:"+id);
+        const existingUser = await db.getItem<User>(tableName + id);
         if (!existingUser) {
             throw new Error("User does not exist");
         }
@@ -61,6 +63,7 @@ export const useUsersHandler = () => {
             throw new Error("Invalid token");
         }
         await db.setItem(id, user);
+        userCache.set(user.name, id);
         return user;
     }
 
@@ -92,7 +95,7 @@ export const useUsersHandler = () => {
             return null;
         }
         const [id, token] = authToken.split(":");
-        const user = await db.getItem<User>(":"+id);
+        const user = await db.getItem<User>(":" + id);
         if (!user) {
             return null;
         }
