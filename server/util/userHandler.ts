@@ -5,12 +5,32 @@ import { User, UserData } from "../model/user";
 
 export const useUsersHandler = () => {
     const db = useStorage("data"); // simple file kv
+    const userCache = new Map<string, string>(); // username -> id
+
+    const init = async () => {
+        // load all users from db
+        const users = await db.getKeys("users");
+        for (const userId of users) {
+            const user = await db.getItem<User>("users:"+userId);
+            if (user) {
+                userCache.set(user.name, userId);
+            }
+        }
+    }
 
     const getUser = async (id: string, token: string) => {
-        const user = await db.getItem<User>(id);
+        const user = await db.getItem<User>("users:"+id);
         if (user && user.token === token) {
             return user;
         }
+    }
+
+    const getUserByName = async (name: string, token: string) => {
+        const userId = userCache.get(name);
+        if (!userId) {
+            return null;
+        }
+        return await getUser(userId, token);
     }
 
     /// create a new user
@@ -32,7 +52,7 @@ export const useUsersHandler = () => {
     /// @throws Error if user does not exist or token is invalid
     const updateUser = async (id: string, user: User) => {
         // check if user exists
-        const existingUser = await db.getItem<User>(id);
+        const existingUser = await db.getItem<User>("users:"+id);
         if (!existingUser) {
             throw new Error("User does not exist");
         }
@@ -72,7 +92,7 @@ export const useUsersHandler = () => {
             return null;
         }
         const [id, token] = authToken.split(":");
-        const user = await db.getItem<User>(id);
+        const user = await db.getItem<User>(":"+id);
         if (!user) {
             return null;
         }
@@ -90,10 +110,12 @@ export const useUsersHandler = () => {
     }
 
     return {
+        init,
         getUser,
         createUser,
         updateUser,
         setAuthentificated,
         getUserByCookie,
+        getUserByName,
     }
 };

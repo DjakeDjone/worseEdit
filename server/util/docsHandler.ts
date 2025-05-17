@@ -4,4 +4,8 @@ import { User } from "../model/user"
 
 export const useDocsHandler = () => {
     const sharedDocs = new Map<string, Doc>();
+
+    return {
+        sharedDocs,
+    }
 }

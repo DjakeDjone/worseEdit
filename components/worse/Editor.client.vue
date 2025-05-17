@@ -11,23 +11,30 @@ import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 
 const modelValue = defineModel()
+const props = defineProps({
+    fileName: {
+        type: String,
+        default: 'worse'
+    },
+    user: {
+        type: Object,
+        default: () => ({
+            name: 'Tip',
+            color: '#000000',
+            id: Math.floor(Math.random() * 100)
+        })
+    }
+})
 const emit = defineEmits(['change']);
 
 const imageInput = ref(null);
 const imageWidth = ref('50%');
 
 const doc = new Y.Doc()
-const provider = new WebsocketProvider(`ws://${location.host}/api/editor/live`, 'init', doc)
+const provider = new WebsocketProvider(`ws://${location.host}/api/editor/live`, props.fileName, doc)
 // const provider = new WebsocketProvider(`ws://localhost:1234`, 'init', doc)
 
-const generateBeautifulColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
+
 
 const editor = useEditor({
     content: modelValue.value || "<p>I'm running Tiptap with Vue.js. 🎉</p>",
@@ -42,10 +49,12 @@ const editor = useEditor({
         // Add a collaboration cursor for each user
         CollaborationCursor.configure({
             provider: provider,
+            // user: props.user.value,
             user: {
-                name: 'User ' + Math.floor(Math.random() * 100),
-                color: generateBeautifulColor(),
-            },
+                name: props.user.name,
+                color: props.user.color,
+                id: props.user.id
+            }
         }),
         ImageResize,
         Image.configure({
@@ -289,6 +298,8 @@ p {
     /* left: -5rem; */
     border-radius: 0 1rem 1rem 1rem;
     padding: .5rem;
-    
+    font-size: 0.8rem;
+    line-height: 1rem;
+
 }
 </style>
