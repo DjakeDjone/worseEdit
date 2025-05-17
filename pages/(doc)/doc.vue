@@ -22,6 +22,11 @@ const fileName = ref("public");
             class="mb-4"
             :disabled="!user"
         />
+        <textarea
+            v-model="content"
+            label="Content"
+            placeholder="Enter content"
+            class="mb-4"></textarea>
         <div class="border rounded-lg p-4 bg-white shadow-sm">
             <ClientOnly>
                 <WorseEditor v-model="content" :fileName="fileName" :user="toYUser(user?user:fakeUser)" />

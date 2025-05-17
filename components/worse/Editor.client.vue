@@ -44,7 +44,7 @@ provider.on('status', (event) => {
 
 
 const editor = useEditor({
-    content: modelValue.value || "<p>I'm running Tiptap with Vue.js. 🎉</p>",
+    // content: modelValue.value || "<p>I'm running Tiptap with Vue.js. 🎉</p>",
     extensions: [
         TiptapStarterKit.configure({
             // The Collaboration extension comes with its own history handling

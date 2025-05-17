@@ -1,5 +1,6 @@
 import { useDocsHandler } from "~/server/util/docsHandler";
 import { useUsersHandler } from "~/server/util/usersHandler";
+import * as Y from "yjs";
 
 export default defineEventHandler(async (event) => {
     const { getUserByCookie } = useUsersHandler();

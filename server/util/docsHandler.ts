@@ -1,7 +1,7 @@
 import { Doc, DocData, DocMeta, DocPermission } from "../model/doc";
 import { User } from "../model/user";
 import { generateDbEntry } from "../model/dbEntry";
-
+import * as Y from 'yjs';
 
 export const useDocsHandler = () => {
     const tableName = "docs";
@@ -27,6 +27,14 @@ export const useDocsHandler = () => {
 
     const getDoc = async (id: string) => {
         const doc = await db.getItem<Doc>(tableName + ":" + id);
+        console.log(`getDoc: ${id}: ${doc?.content}`);
+        // set yjs
+        if (doc && doc.yjs) {
+            doc.yjs = new Y.Doc();
+            const update = new TextEncoder().encode(doc.content);
+            Y.applyUpdate(doc.yjs, update);
+            doc.content = doc.yjs.toString();
+        }
         return doc;
     }
 
@@ -78,7 +86,28 @@ export const useDocsHandler = () => {
         const updatedDoc = { ...existingDoc, ...doc, updatedAt: new Date() };
         await db.setItem(tableName + ":" + id, updatedDoc);
         return updatedDoc;
-    }
+    };
+
+    /// update doc content
+    /// @param id doc id
+    /// @param content new content as a string (e.g., base64 encoded)
+    /// @returns updated doc object
+    /// @throws Error if doc does not exist
+    const updateDocContent = async (id: string, content: string) => {
+        const existingDoc = await db.getItem<Doc>(tableName + ":" + id);
+        if (!existingDoc) {
+            // Or, depending on desired behavior, create it or log an error.
+            // For Yjs persistence, the doc should typically exist due to prior auth/setup.
+            throw new Error(`Doc with id ${id} does not exist, cannot update content.`);
+        }
+        const updatedDoc: Doc = {
+            ...existingDoc,
+            content: content,
+            updatedAt: new Date(),
+        };
+        await db.setItem(tableName + ":" + id, updatedDoc);
+        return updatedDoc;
+    };
 
     /// delete doc
     /// @param id doc id
@@ -100,6 +129,7 @@ export const useDocsHandler = () => {
         checkDocPermissions,
         createDoc,
         updateDoc,
+        updateDocContent, // Add new function here
         deleteDoc,
     }
 }

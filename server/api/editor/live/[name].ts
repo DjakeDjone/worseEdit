@@ -10,22 +10,53 @@ import * as map from 'lib0/map'
 
 import { useUsersHandler } from '~/server/util/usersHandler'
 import { useDocsHandler } from '~/server/util/docsHandler'
+import { Buffer } from 'node:buffer'; // Ensure Buffer is available
 
-const messageSync = 0
-const messageAwareness = 1
+const messageSync = 0;
+const messageAwareness = 1;
 
+// Debounce utility
+const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
+    let timeout: NodeJS.Timeout | null = null;
+    const debounced = (...args: Parameters<F>): Promise<void> => {
+        return new Promise<void>((resolve, reject) => { // Added reject for error handling
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+            timeout = setTimeout(() => {
+                try {
+                    resolve(func(...args));
+                } catch (error) {
+                    reject(error);
+                }
+            }, waitFor);
+        });
+    };
+    return debounced;
+};
 
 export class WSSharedDoc extends Y.Doc {
-    name: string
-    conns: Map<any, Set<number>> // peer (from Nitro) will be the key
-    awareness: awarenessProtocol.Awareness
+    name: string;
+    conns: Map<any, Set<number>>; // peer (from Nitro) will be the key
+    awareness: awarenessProtocol.Awareness;
+    private updateDocContentFunc: (docName: string, content: string) => Promise<any>;
+    private debouncedSave: () => Promise<void>;
+    public loadingPromise: Promise<void>; // Public to allow awaiting load completion
 
-    constructor(name: string) {
-        super({ gc: true }) // Or configure GC as needed
-        this.name = name
-        this.conns = new Map()
-        this.awareness = new awarenessProtocol.Awareness(this)
-        this.awareness.setLocalState(null)
+    constructor(
+        name: string,
+        updateDocContentFunc: (docName: string, content: string) => Promise<any>,
+        initialContentLoader: (docName: string) => Promise<string | null>
+    ) {
+        super({ gc: true }); // Or configure GC as needed
+        this.name = name;
+        this.updateDocContentFunc = updateDocContentFunc;
+        this.conns = new Map();
+        this.awareness = new awarenessProtocol.Awareness(this);
+        this.awareness.setLocalState(null);
+
+        // Initialize and store the promise for loading initial content
+        this.loadingPromise = this._loadInitialContent(initialContentLoader);
 
         const awarenessChangeHandler = ({ added, updated, removed }: any, conn: any) => {
             const changedClients = added.concat(updated, removed)
@@ -49,7 +80,20 @@ export class WSSharedDoc extends Y.Doc {
                 }
             })
         }
-        this.awareness.on('update', awarenessChangeHandler)
+        this.awareness.on('update', awarenessChangeHandler);
+
+        const DEBOUNCE_TIMEOUT = 2000; // 2 seconds
+        this.debouncedSave = debounce(async () => {
+            // console.log(`[ws persist] Attempting to persist document ${this.name}`);
+            try {
+                const contentUpdate = Y.encodeStateAsUpdateV2(this);
+                const contentBase64 = Buffer.from(contentUpdate).toString('base64');
+                await this.updateDocContentFunc(this.name, contentBase64);
+                // console.log(`[ws persist] Document ${this.name} persisted successfully.`);
+            } catch (e) {
+                console.error(`[ws persist] Error persisting document ${this.name}:`, e);
+            }
+        }, DEBOUNCE_TIMEOUT);
 
         // Handle document updates and broadcast them
         this.on('update', (update: Uint8Array, origin: any) => {
@@ -61,12 +105,17 @@ export class WSSharedDoc extends Y.Doc {
                 // Only send to clients other than the origin if origin is a peer
                 if (conn !== origin) {
                     try {
-                        conn.send(message)
+                        conn.send(message);
                     } catch (e) {
-                        this.closeConn(conn)
+                        this.closeConn(conn);
                     }
                 }
-            })
+            });
+
+            // Persist changes, avoid saving if the update comes from initial loading
+            if (origin !== 'load') {
+                this.debouncedSave();
+            }
         })
 
         // Optional: Debounced callback for persistence or other actions
@@ -75,6 +124,27 @@ export class WSSharedDoc extends Y.Doc {
         //     debouncer(() => callbackHandler(doc as WSSharedDoc));
         //   });
         // }
+    }
+
+    private async _loadInitialContent(
+        initialContentLoader: (docName: string) => Promise<string | null>
+    ): Promise<void> {
+        try {
+            const persistedContentBase64 = await initialContentLoader(this.name);
+            if (persistedContentBase64 && persistedContentBase64.length > 0) {
+                const contentUpdate = Buffer.from(persistedContentBase64, 'base64');
+                // Apply update with 'load' origin to prevent immediate re-saving
+                Y.applyUpdateV2(this, contentUpdate, 'load');
+                console.log(`[ws persist] Loaded persisted state for doc ${this.name}`);
+            }
+            // If content is null or empty, doc remains new/empty, which is fine.
+        } catch (e: any) {
+            // This catch is for unexpected errors during the loading process itself (e.g., Y.applyUpdateV2 failure)
+            // The initialContentLoader should handle its own errors (like fetch failures).
+            console.error(`[ws persist] Error applying persisted state for doc ${this.name}:`, e);
+            // Depending on desired behavior, this could re-throw or just log.
+            // For now, it logs, and the promise resolves, allowing the app to proceed with a potentially empty doc.
+        }
     }
 
     closeConn(peer: any) {
@@ -88,24 +158,44 @@ export class WSSharedDoc extends Y.Doc {
                 //   this.destroy()
                 // })
                 // docs.delete(this.name)
+                // Consider triggering a final save if the document is about to be destroyed
+                // For example: this.debouncedSave().catch(e => console.error(`Error on final save for ${this.name}`, e));
+                // However, ensure this doesn't conflict with existing debounce logic or cause issues if called multiple times.
             }
         }
         // Nitro handles peer closing, but you might want to log or perform additional cleanup
     }
 }
 
-const docs: Map<string, WSSharedDoc> = new Map()
+const docs: Map<string, WSSharedDoc> = new Map();
+
+// Initialize docsHandler once, assuming useStorage is safe at module level in Nitro.
+// If not, docsHandler instance might need to be created/passed differently.
+const docsHandlerInstance = useDocsHandler();
 
 export const getYDoc = (docname: string, gc = true): WSSharedDoc =>
     map.setIfUndefined(docs, docname, () => {
-        const doc = new WSSharedDoc(docname)
-        doc.gc = gc
-        // if (persistence !== null) {
-        //   persistence.bindState(docname, doc)
-        // }
-        docs.set(docname, doc)
-        return doc
-    })
+        const doc = new WSSharedDoc(
+            docname,
+            docsHandlerInstance.updateDocContent,
+            async (nameToLoad: string): Promise<string | null> => { // initialContentLoader
+                try {
+                    const persistedDoc = await docsHandlerInstance.getDoc(nameToLoad);
+                    return persistedDoc?.content ?? null; // Return content or null if not found/empty
+                } catch (e: any) {
+                    if (e.message && (e.message.toLowerCase().includes("not found") || (e.status && e.status === 404))) {
+                        console.warn(`[ws persist] Persisted doc ${nameToLoad} not found (may be new).`);
+                    } else {
+                        console.error(`[ws persist] Error fetching persisted doc ${nameToLoad}:`, e.message || e);
+                    }
+                    return null; // Ensure null is returned on error/not found so loadingPromise resolves
+                }
+            }
+        );
+        doc.gc = gc;
+        // The old async loading logic (docsHandlerInstance.getDoc().then(...)) is now handled within WSSharedDoc constructor.
+        return doc;
+    });
 
 
 export const getYDocName = (peer: Peer<AdapterInternal>) => {
@@ -120,7 +210,7 @@ export const getYDocName = (peer: Peer<AdapterInternal>) => {
 
 export default defineWebSocketHandler({
     async open(peer) {
-        console.log('[ws] open', peer)
+        console.log('[ws] open')
         const roomName = getYDocName(peer);
         const { getUserByCookie } = useUsersHandler();
         const { getDoc: getDbDoc, checkDocPermissions } = useDocsHandler(); // Renamed to avoid conflict
@@ -165,9 +255,15 @@ export default defineWebSocketHandler({
                     return;
                 }
             }
+            console.info(`[ws] Document ${roomName} found:`, dbDoc.content);
 
             // If authorization passed, proceed with setting up Yjs doc connection
             const doc = getYDoc(roomName);
+
+            // Wait for the document to be fully loaded from persistence
+            // This ensures that initial sync (syncStep1) uses the complete document state.
+            await doc.loadingPromise;
+
             doc.conns.set(peer, new Set());
 
             // Send sync step 1 (initial sync)
@@ -198,6 +294,8 @@ export default defineWebSocketHandler({
         // console.log('[ws] message', peer, message)
         // const urlParts = peer.url.split('?')[0].split('/')
         const roomName = getYDocName(peer);
+        // By the time a message is received, getYDoc() will return the already (attempted) loaded doc.
+        // No need to await loadingPromise here as it's primarily for initial setup.
         const doc = getYDoc(roomName)
         const M_TEXT = message.text() // Not used by y-websocket-server which expects binary
         const M_DATA = message.data // Uint8Array if binary
@@ -234,21 +332,21 @@ export default defineWebSocketHandler({
     },
 
     close(peer, event) {
-        console.log('[ws] close', peer, event)
+        console.log('[ws] close', event)
         // const urlParts = peer.url.split('?')[0].split('/')
         // const roomName = urlParts[urlParts.length -1] || 'default-room'
         const roomName = getYDocName(peer);
-
+        // No need to await loadingPromise here.
         const doc = getYDoc(roomName)
         doc.closeConn(peer)
     },
 
     error(peer, error) {
-        console.log('[ws] error', peer, error)
+        console.log('[ws] error', error)
         // const urlParts = peer.url.split('?')[0].split('/')
         // const roomName = urlParts[urlParts.length - 1] || 'default-room'
         const roomName = getYDocName(peer);
-
+        // No need to await loadingPromise here.
         const doc = getYDoc(roomName) // Get the doc to ensure cleanup if possible
         doc.closeConn(peer) // Attempt to clean up connection specific data in the doc
     },
