@@ -14,7 +14,7 @@ const modelValue = defineModel()
 const props = defineProps({
     fileName: {
         type: String,
-        default: 'worse'
+        default: 'public'
     },
     user: {
         type: Object,
@@ -34,6 +34,13 @@ const doc = new Y.Doc()
 const provider = new WebsocketProvider(`ws://${location.host}/api/editor/live`, props.fileName, doc)
 // const provider = new WebsocketProvider(`ws://localhost:1234`, 'init', doc)
 
+provider.on('status', (event) => {
+    if (event.status === 'disconnected') {
+        // Handle disconnection, possibly an error or server down
+        console.error('WebSocket disconnected. Redirecting to /notFound');
+        useRouter().push('/notFound');
+    }
+})
 
 
 const editor = useEditor({

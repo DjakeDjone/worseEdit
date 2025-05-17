@@ -1,4 +1,4 @@
-import { useUsersHandler } from "../util/userHandler"
+import { useUsersHandler } from "../util/usersHandler"
 
 export default defineNitroPlugin((nitroApp) => {
     const userHandler = useUsersHandler();

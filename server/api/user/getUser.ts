@@ -1,4 +1,4 @@
-import { useUsersHandler } from "~/server/util/userHandler";
+import { useUsersHandler } from "~/server/util/usersHandler";
 import { getCookie } from 'h3'; // Assuming you're using cookies for auth tokens
 import { fromUser } from "~/server/model/user";
 

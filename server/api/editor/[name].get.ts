@@ -1,13 +1,13 @@
 import { useDocsHandler } from "~/server/util/docsHandler";
-import { useUsersHandler } from "~/server/util/userHandler";
+import { useUsersHandler } from "~/server/util/usersHandler";
 
 export default defineEventHandler(async (event) => {
     const { getUserByCookie } = useUsersHandler();
     const user = await getUserByCookie(event);
-    if (!user) {
-        setResponseStatus(event, 401);
-        return;
-    }
+    // if (!user) {
+    //     setResponseStatus(event, 401);
+    //     return;
+    // }
 
     const { getDoc } = useDocsHandler();
     const docName = getRouterParam(event, "name");
@@ -20,8 +20,14 @@ export default defineEventHandler(async (event) => {
         setResponseStatus(event, 404);
         return;
     }
-    // check if user has permission to access the doc
-    await useDocsHandler().checkDocPermissions(doc, user);
+    if (!doc.public && !user) {
+        setResponseStatus(event, 401);
+        return;
+    }
+    if (!doc.public && user) {
+        // check if user has permission to access the doc
+        await useDocsHandler().checkDocPermissions(doc, user);
+    }
 
     setResponseStatus(event, 200);
     return doc;

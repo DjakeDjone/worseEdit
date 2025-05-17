@@ -1,6 +1,6 @@
 import { DocData, DocMeta } from "~/server/model/doc";
 import { useDocsHandler } from "~/server/util/docsHandler";
-import { useUsersHandler } from "~/server/util/userHandler";
+import { useUsersHandler } from "~/server/util/usersHandler";
 
 export default defineEventHandler(async (event) => {
     const body = await readBody<DocMeta>(event);

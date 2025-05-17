@@ -1,5 +1,5 @@
 import { fromUser } from "~/server/model/user";
-import { useUsersHandler } from "~/server/util/userHandler";
+import { useUsersHandler } from "~/server/util/usersHandler";
 
 export default defineEventHandler(async (event) => {
     const { username, token } = await readBody(event);

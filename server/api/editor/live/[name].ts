@@ -8,7 +8,7 @@ import * as encoding from 'lib0/encoding'
 import * as decoding from 'lib0/decoding'
 import * as map from 'lib0/map'
 
-import { useUsersHandler } from '~/server/util/userHandler'
+import { useUsersHandler } from '~/server/util/usersHandler'
 import { useDocsHandler } from '~/server/util/docsHandler'
 
 const messageSync = 0

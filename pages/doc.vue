@@ -4,7 +4,7 @@ import { fakeUser, toYUser } from "@/server/model/user";
 const { user } = useUserHandler();
 
 const content = ref("<h1>Worse</h1><p>The better Editor! 🎉</p>");
-const fileName = ref("worse");
+const fileName = ref("public");
 
 </script>
 
@@ -15,7 +15,17 @@ const fileName = ref("worse");
             <h2 class="text-xl">Welcome {{ user ? user.name : 'Developer' }}!</h2>
         </div>
 
-        <InputText v-model="fileName" label="File Name" placeholder="Enter file name" class="mb-4" :disabled="!user" />
-        <NuxtLink to="/doc" class="text-blue-500 hover:underline mb-4" v-if="user">Go to Document</NuxtLink>
+        <InputText
+            v-model="fileName"
+            label="File Name"
+            placeholder="Enter file name"
+            class="mb-4"
+            :disabled="!user"
+        />
+        <div class="border rounded-lg p-4 bg-white shadow-sm">
+            <ClientOnly>
+                <WorseEditor v-model="content" :fileName="fileName" :user="toYUser(user?user:fakeUser)" />
+            </ClientOnly>
+        </div>
     </main>
 </template>
