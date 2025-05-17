@@ -77,6 +77,9 @@ importers:
       utils:
         specifier: link:y-websocket/bin/utils
         version: link:y-websocket/bin/utils
+      vercel-kv:
+        specifier: link:unstorage/drivers/vercel-kv
+        version: link:unstorage/drivers/vercel-kv
       vue:
         specifier: ^3.5.14
         version: 3.5.14(typescript@5.8.3)
