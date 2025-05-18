@@ -11,6 +11,28 @@ import { CollaborationCursor } from '@tiptap/extension-collaboration-cursor'
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import { Node, mergeAttributes } from '@tiptap/core'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { all, createLowlight } from 'lowlight'
+import TaskItem from '@tiptap/extension-task-item'
+import TaskList from '@tiptap/extension-task-list'
+import Underline from '@tiptap/extension-underline'
+
+
+// for code highlighting
+// import css from 'highlight.js/lib/languages/css'
+// import js from 'highlight.js/lib/languages/javascript'
+// import ts from 'highlight.js/lib/languages/typescript'
+// import html from 'highlight.js/lib/languages/xml'
+
+// // create a lowlight instance
+// const lowlight = createLowlight(all)
+
+// // you can also register languages
+// lowlight.register('html', html)
+// lowlight.register('css', css)
+// lowlight.register('js', js)
+// lowlight.register('ts', ts)
+
 
 // Custom Page Break Extension
 const PageBreakNode = Node.create({
@@ -81,6 +103,14 @@ const editor = useEditor({
             // The Collaboration extension comes with its own history handling
             history: false,
         }),
+        Underline,
+        TaskList,
+        TaskItem.configure({
+            nested: true,
+        }),
+        // CodeBlockLowlight.configure({
+        // lowlight,
+        // }),
         Collaboration.configure({
             document: doc,
         }),
@@ -117,6 +147,17 @@ const uploadImage = () => {
     imageInput.value.click();
 };
 
+const downloadAsHTML = () => {
+    const html = editor.getHTML();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${props.fileName}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+};
+
 const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -144,6 +185,11 @@ onBeforeUnmount(() => {
         <slot name="editor-actions">
             <div id="editor-actions" v-if="editor"
                 class="inner-border flex flex-wrap gap-2 mb-2 sticky top-0 bg-white/20 backdrop-blur-lg z-10 rounded-md w-fit p-4">
+
+                <Button @click="downloadAsHTML()" v-tooltip.bottom="'Download as HTML'">
+                    <Icon name="mdi:download" />
+                </Button>
+
                 <Dropdown :class="{ 'p-button-active': editor.isActive('heading', { level: 1 }) }" :options="[
                     { label: 'H1', command: () => editor.chain().focus().toggleHeading({ level: 1 }).run() },
                     { label: 'H2', command: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
@@ -157,37 +203,35 @@ onBeforeUnmount(() => {
                     <Button severity="secondary" @click="editor.chain().focus().toggleBold().run()"
                         :disabled="!editor.can().chain().focus().toggleBold().run()" v-tooltip.bottom="'Bold'"
                         :class="{ 'p-button-active': editor.isActive('bold') }">
-
                         <Icon name="mdi:format-bold" />
-
                     </Button>
                     <Button severity="secondary" @click="editor.chain().focus().toggleItalic().run()"
                         :disabled="!editor.can().chain().focus().toggleItalic().run()" v-tooltip.bottom="'Italic'"
                         :class="{ 'p-button-active': editor.isActive('italic') }">
-
                         <Icon name="mdi:format-italic" />
-
                     </Button>
+
                     <Button severity="secondary" @click="editor.chain().focus().toggleStrike().run()"
                         :disabled="!editor.can().chain().focus().toggleStrike().run()"
                         v-tooltip.bottom="'Strike Through'" :class="{ 'p-button-active': editor.isActive('strike') }">
-
                         <Icon name="mdi:format-strikethrough" />
-
+                    </Button>
+                    <Button severity="secondary" @click="editor.chain().focus().toggleUnderline().run()"
+                        :disabled="!editor.can().chain().focus().toggleUnderline().run()" v-tooltip.bottom="'Underline'"
+                        :class="{ 'p-button-active': editor.isActive('underline') }">
+                        <Icon name="mdi:format-underline" />
                     </Button>
                 </div>
 
-                <div class="flex gap-2 px-2">
-                    <Button severity="secondary" @click="editor.chain().focus().toggleBulletList().run()"
-                        :class="{ 'p-button-active': editor.isActive('bulletList') }" v-tooltip.bottom="'Bullet List'">
-                        <Icon name="mdi:format-list-bulleted" />
-                    </Button>
-                    <Button severity="secondary" @click="editor.chain().focus().toggleOrderedList().run()"
-                        :class="{ 'p-button-active': editor.isActive('orderedList') }"
-                        v-tooltip.bottom="'Ordered List'">
-                        <Icon name="mdi:format-list-numbered" />
-                    </Button>
-                </div>
+                <Dropdown
+                    :class="{ 'p-button-active': editor.isActive('bulletList') || editor.isActive('orderedList') || editor.isActive('taskList') }"
+                    :options="[
+                        { label: 'Bullet List', command: () => editor.chain().focus().toggleBulletList().run() },
+                        { label: 'Ordered List', command: () => editor.chain().focus().toggleOrderedList().run() },
+                        { label: 'Task List', command: () => editor.chain().focus().toggleTaskList().run() },
+                    ]" placeholder="List Type" optionLabel="label" @change="(e) => {
+                        e.value.command()
+                    }" />
                 <div class="flex gap-2 px-2">
                     <Button severity="secondary" @click="editor.chain().focus().toggleBlockquote().run()"
                         :class="{ 'p-button-active': editor.isActive('blockquote') }" v-tooltip.bottom="'Blockquote'">
@@ -307,6 +351,30 @@ onBeforeUnmount(() => {
 .page {
     height: 100vh;
     /* Replace with number */
+}
 
+/* checkboxes li flex */
+ul[data-type="taskList"] {
+    list-style: none;
+    padding: 0;
+}
+
+ul[data-type="taskList"] li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+}
+
+ul[data-type="taskList"] li label {
+    cursor: pointer;
+    padding-top: .5rem !important;
+
+}
+
+ul[data-type="taskList"] li input[type="checkbox"] {
+    cursor: pointer;
+    width: 1rem;
+    height: 1rem;
 }
 </style>

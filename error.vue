@@ -32,7 +32,7 @@ const handleError = () => clearError({ redirect: '/' })
                 die Musikschule.
             </h2>
         </div>
-        <section class="absolute bottom-0 left-0 w-full p-4 bg-red-500 text-white text-center">
+        <section class="absolute bottom-0 left-0 w-full bg-primary-500 p-4 text-white text-center">
             <h3>
                 Fehlermeldung: <span>
                     {{ error?.statusCode }}
