@@ -11,11 +11,11 @@ import { CollaborationCursor } from '@tiptap/extension-collaboration-cursor'
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import { Node, mergeAttributes } from '@tiptap/core'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import { all, createLowlight } from 'lowlight'
-import TaskItem from '@tiptap/extension-task-item'
-import TaskList from '@tiptap/extension-task-list'
-import Underline from '@tiptap/extension-underline'
+// import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+// import { all, createLowlight } from 'lowlight'
+// import TaskItem from '@tiptap/extension-task-item'
+// import TaskList from '@tiptap/extension-task-list'
+// import Underline from '@tiptap/extension-underline'
 
 
 // for code highlighting
@@ -259,25 +259,7 @@ onBeforeUnmount(() => {
                     </Button>
                 </div>
 
-                <!-- <ButtonGroup>
-                    <Button severity="secondary" @click="editor.chain().focus().setTextAlign('left').run()"
-                        :class="{ 'p-button-active': editor.isActive({ textAlign: 'left' }) }"
-                        v-tooltip.bottom="'Align Left'">
-                        <Icon name="mdi:format-align-left" />
-                    </Button>
-                    <Button severity="secondary" @click="editor.chain().focus().setTextAlign('center').run()"
-                        :class="{ 'p-button-active': editor.isActive({ textAlign: 'center' }) }"
-                        v-tooltip.bottom="'Align Center'">
-                        <Icon name="mdi:format-align-center" />
-                    </Button>
-                    <Button severity="secondary" @click="editor.chain().focus().setTextAlign('right').run()"
-                        :class="{ 'p-button-active': editor.isActive({ textAlign: 'right' }) }"
-                        v-tooltip.bottom="'Align Right'">
-                        <Icon name="mdi:format-align-right" />
-                    </Button>
-                </ButtonGroup> -->
 
-                <!-- Table controls -->
                 <div class="flex gap-2">
                     <Button severity="secondary"
                         @click="editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()"
