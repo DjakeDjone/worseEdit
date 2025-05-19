@@ -1,21 +1,29 @@
 <script setup>
-import "@/assets/editor.css";
+import "@/assets/editor.css"
+import { Node, mergeAttributes } from '@tiptap/core'
+import { Editor, EditorContent, BubbleMenu } from '@tiptap/vue-3'
 import { Image } from '@tiptap/extension-image'
 import { ImageResize } from 'tiptap-extension-resize-image';
+import { Collaboration } from '@tiptap/extension-collaboration'
+import { CollaborationCursor } from '@tiptap/extension-collaboration-cursor'
+import * as Y from 'yjs'
+import FontFamily from '@tiptap/extension-font-family'
+import { WebsocketProvider } from 'y-websocket'
+import TaskItem from '@tiptap/extension-task-item'
+import TaskList from '@tiptap/extension-task-list'
+import Underline from '@tiptap/extension-underline'
+import TiptapStarterKit from '@tiptap/starter-kit'
 import Table from '@tiptap/extension-table'
 import TableRow from '@tiptap/extension-table-row'
 import TableHeader from '@tiptap/extension-table-header'
 import TableCell from '@tiptap/extension-table-cell'
-import { Collaboration } from '@tiptap/extension-collaboration'
-import { CollaborationCursor } from '@tiptap/extension-collaboration-cursor'
-import * as Y from 'yjs'
-import { WebsocketProvider } from 'y-websocket'
-import { Node, mergeAttributes } from '@tiptap/core'
-// import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-// import { all, createLowlight } from 'lowlight'
-// import TaskItem from '@tiptap/extension-task-item'
-// import TaskList from '@tiptap/extension-task-list'
-// import Underline from '@tiptap/extension-underline'
+import CharacterCount from '@tiptap/extension-character-count'
+import { Color } from '@tiptap/extension-color'
+import TextStyle from '@tiptap/extension-text-style'
+import Highlight from '@tiptap/extension-highlight'
+
+
+
 
 
 // for code highlighting
@@ -79,8 +87,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['change']);
 
-const imageInput = ref(null);
-const imageWidth = ref('50%');
+const scale = ref(1);
 
 const doc = new Y.Doc()
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'; // TODO: replace with nuxt directive
@@ -103,8 +110,15 @@ const editor = useEditor({
             // The Collaboration extension comes with its own history handling
             history: false,
         }),
+        CharacterCount.configure({
+            limit: this.limit,
+        }),
+        Color,
+        BubbleMenu,
+        Highlight.configure({ multicolor: true }),
         Underline,
         TaskList,
+        TextStyle,
         TaskItem.configure({
             nested: true,
         }),
@@ -114,27 +128,28 @@ const editor = useEditor({
         Collaboration.configure({
             document: doc,
         }),
+        FontFamily,
         // Add a collaboration cursor for each user
-        CollaborationCursor.configure({
-            provider: provider,
-            // user: props.user.value,
-            user: {
-                name: props.user.name,
-                color: props.user.color,
-                id: props.user.id
-            }
-        }),
+        // CollaborationCursor.configure({
+        //     provider: provider,
+        //     // user: props.user.value,
+        //     user: {
+        //         name: props.user.name,
+        //         color: props.user.color,
+        //         id: props.user.id
+        //     }
+        // }),
         ImageResize,
         Image.configure({
             inline: true,
             allowBase64: true,
         }),
-        Table.configure({
-            resizable: true,
-        }),
         TableRow,
         TableHeader,
         TableCell,
+        Table.configure({
+            resizable: true,
+        }),
         PageBreakNode, // Add the custom extension here
     ],
     onUpdate({ editor }) {
@@ -143,36 +158,7 @@ const editor = useEditor({
     },
 });
 
-const uploadImage = () => {
-    imageInput.value.click();
-};
 
-const downloadAsHTML = () => {
-    const html = editor.getHTML();
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${props.fileName}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
-};
-
-const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const base64String = e.target.result;
-        if (!base64String) {
-            console.error("Failed to read image data.");
-            return;
-        }
-        editor.value.chain().focus().setImage({ src: base64String, width: imageWidth.value }).run();
-    };
-    reader.readAsDataURL(file);
-};
 
 onBeforeUnmount(() => {
     unref(editor).destroy();
@@ -183,120 +169,42 @@ onBeforeUnmount(() => {
 <template>
     <div class="w-full no-animate">
         <slot name="editor-actions">
-            <div id="editor-actions" v-if="editor"
-                class="inner-border flex flex-wrap gap-2 mb-2 sticky top-0 bg-white/20 backdrop-blur-lg z-10 rounded-md w-fit p-4">
-
-                <Button @click="downloadAsHTML()" v-tooltip.bottom="'Download as HTML'">
-                    <Icon name="mdi:download" />
-                </Button>
-
-                <Dropdown :class="{ 'p-button-active': editor.isActive('heading', { level: 1 }) }" :options="[
-                    { label: 'H1', command: () => editor.chain().focus().toggleHeading({ level: 1 }).run() },
-                    { label: 'H2', command: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
-                    { label: 'H3', command: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
-                    { label: 'H4', command: () => editor.chain().focus().toggleHeading({ level: 4 }).run() },
-                    { label: 'text', command: () => editor.chain().focus().setParagraph().run() },
-                ]" placeholder="Heading" optionLabel="label" @change="(e) => {
-                    e.value.command()
-                }" />
-                <div class="flex gap-2">
-                    <Button severity="secondary" @click="editor.chain().focus().toggleBold().run()"
-                        :disabled="!editor.can().chain().focus().toggleBold().run()" v-tooltip.bottom="'Bold'"
-                        :class="{ 'p-button-active': editor.isActive('bold') }">
-                        <Icon name="mdi:format-bold" />
-                    </Button>
-                    <Button severity="secondary" @click="editor.chain().focus().toggleItalic().run()"
-                        :disabled="!editor.can().chain().focus().toggleItalic().run()" v-tooltip.bottom="'Italic'"
-                        :class="{ 'p-button-active': editor.isActive('italic') }">
-                        <Icon name="mdi:format-italic" />
-                    </Button>
-
-                    <Button severity="secondary" @click="editor.chain().focus().toggleStrike().run()"
-                        :disabled="!editor.can().chain().focus().toggleStrike().run()"
-                        v-tooltip.bottom="'Strike Through'" :class="{ 'p-button-active': editor.isActive('strike') }">
-                        <Icon name="mdi:format-strikethrough" />
-                    </Button>
-                    <Button severity="secondary" @click="editor.chain().focus().toggleUnderline().run()"
-                        :disabled="!editor.can().chain().focus().toggleUnderline().run()" v-tooltip.bottom="'Underline'"
-                        :class="{ 'p-button-active': editor.isActive('underline') }">
-                        <Icon name="mdi:format-underline" />
-                    </Button>
-                </div>
-
-                <Dropdown
-                    :class="{ 'p-button-active': editor.isActive('bulletList') || editor.isActive('orderedList') || editor.isActive('taskList') }"
-                    :options="[
-                        { label: 'Bullet List', command: () => editor.chain().focus().toggleBulletList().run() },
-                        { label: 'Ordered List', command: () => editor.chain().focus().toggleOrderedList().run() },
-                        { label: 'Task List', command: () => editor.chain().focus().toggleTaskList().run() },
-                    ]" placeholder="List Type" optionLabel="label" @change="(e) => {
-                        e.value.command()
-                    }" />
-                <div class="flex gap-2 px-2">
-                    <Button severity="secondary" @click="editor.chain().focus().toggleBlockquote().run()"
-                        :class="{ 'p-button-active': editor.isActive('blockquote') }" v-tooltip.bottom="'Blockquote'">
-                        <Icon name="mdi:format-quote-open" />
-                    </Button>
-
-                    <Button severity="secondary" @click="editor.chain().focus().setHorizontalRule().run()"
-                        v-tooltip.bottom="'Horizontal Rule'">
-                        <Icon name="mdi:minus" />
-                    </Button>
-
-                    <Button severity="secondary" @click="editor.chain().focus().setHardBreak().run()"
-                        v-tooltip.bottom="'Hard Break'">
-                        <Icon name="mdi:format-page-break" />
-                    </Button>
-
-                    <Button severity="secondary" @click="editor.chain().focus().setPageBreak().run()"
-                        v-tooltip.bottom="'Insert Page Break'">
-                        <Icon name="mdi:file-document-outline" /> <!-- Example icon, choose one you like -->
-                    </Button>
-
-                    <Button severity="secondary" @click="uploadImage()" v-tooltip.bottom="'Add Image'">
-                        <Icon name="mdi:image-plus" />
-                        <input type="file" accept="image/*" class="hidden" ref="imageInput" @change="handleImageUpload">
-                    </Button>
-                </div>
-
-
-                <div class="flex gap-2">
-                    <Button severity="secondary"
-                        @click="editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()"
-                        v-tooltip.bottom="'Insert Table'">
-                        <Icon name="mdi:table" />
-                    </Button>
-                    <Dropdown v-if="editor.isActive('table')" :options="[
-                        { label: 'Add Column Before', command: () => editor.chain().focus().addColumnBefore().run() },
-                        { label: 'Add Column After', command: () => editor.chain().focus().addColumnAfter().run() },
-                        { label: 'Delete Column', command: () => editor.chain().focus().deleteColumn().run() },
-                        { label: 'Add Row Before', command: () => editor.chain().focus().addRowBefore().run() },
-                        { label: 'Add Row After', command: () => editor.chain().focus().addRowAfter().run() },
-                        { label: 'Delete Row', command: () => editor.chain().focus().deleteRow().run() },
-                        { label: 'Delete Table', command: () => editor.chain().focus().deleteTable().run() }
-                    ]" placeholder="Table Options" optionLabel="label" @change="(e) => {
-                        e.value.command()
-                    }">
-                        <template #value>
-                            <span>Table Options</span>
-                        </template>
-                    </Dropdown>
-                </div>
-
-                <ButtonGroup class="rounded-full">
-                    <Button severity="secondary" @click="editor.chain().focus().undo().run()"
-                        :disabled="!editor.can().chain().focus().undo().run()" v-tooltip.bottom="'Undo'">
-                        <Icon name="mdi:undo" />
-                    </Button>
-                    <Button severity="secondary" @click="editor.chain().focus().redo().run()"
-                        :disabled="!editor.can().chain().focus().redo().run()" v-tooltip.bottom="'Redo'">
-                        <Icon name="mdi:redo" />
-                    </Button>
-                </ButtonGroup>
-            </div>
+            <Tabs value="0" class="sticky top-0 z-50 backdrop-blur-md">
+                <TabList>
+                    <Tab value="-1">
+                        File
+                    </Tab>
+                    <Tab value="0">
+                        Home
+                    </Tab>
+                    <Tab value="1">
+                        Insert
+                    </Tab>
+                    <Tab value="2">
+                        Layout
+                    </Tab>
+                    <Tab value="3">
+                        View
+                    </Tab>
+                </TabList>
+                <TabPanels class="!p-0" v-auto-animate>
+                    <TabPanel value="-1">
+                        <WorseHeaderFile :editor="editor" :fileName="props.fileName" />
+                    </TabPanel>
+                    <TabPanel value="0">
+                        <WorseHeaderHome :editor="editor" :fileName="props.fileName" />
+                    </TabPanel>
+                    <TabPanel value="1">
+                        <WorseHeaderInsert :editor="editor" :fileName="props.fileName" />
+                    </TabPanel>
+                    <TabPanel value="2">
+                        <WorseHeaderLayout :editor="editor" :fileName="props.fileName" />
+                    </TabPanel>
+                </TabPanels>
+            </Tabs>
         </slot>
-        <div class="w-full flex justify-center">
-            <Card class="px-[4rem] w-[793px]">
+        <div class="w-full flex justify-center max-w-full overflow-x-auto xl:p-4 2xl:py-8">
+            <Card class="px-[4rem] w-[793px]" :style="{ transform: `scale(${scale})`, transformOrigin: 'top left' }">
                 <template #header>
                     <div class="h-10 flex items-center justify-between">
 
@@ -306,6 +214,11 @@ onBeforeUnmount(() => {
                     <TiptapEditorContent :editor="editor" class="prose max-w-[100vw] *:w-full" />
                 </template>
             </Card>
+        </div>
+        <div class="sticky bottom-0 z-50 backdrop-blur-md">
+            <slot name="bottomNav">
+                <WorseFooter :editor="editor" :fileName="props.fileName" v-model:scale="scale" />
+            </slot>
         </div>
     </div>
 
@@ -333,6 +246,31 @@ onBeforeUnmount(() => {
 .page {
     height: 100vh;
     /* Replace with number */
+}
+
+/* checkboxes li flex */
+ul[data-type="taskList"] {
+    list-style: none;
+    padding: 0;
+}
+
+ul[data-type="taskList"] li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+}
+
+ul[data-type="taskList"] li label {
+    cursor: pointer;
+    padding-top: .5rem !important;
+
+}
+
+ul[data-type="taskList"] li input[type="checkbox"] {
+    cursor: pointer;
+    width: 1rem;
+    height: 1rem;
 }
 
 /* checkboxes li flex */
