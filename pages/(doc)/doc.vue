@@ -16,7 +16,7 @@ const fileName = ref("public");
         </div>
 
         
-        <div class="border rounded-lg p-4 bg-white shadow-sm">
+        <div class="rounded-lg p-4 bg-white shadow-sm">
             <ClientOnly>
                 <WorseEditor v-model="content" :fileName="fileName" :user="toYUser(user?user:fakeUser)" />
             </ClientOnly>

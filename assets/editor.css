@@ -1,7 +1,7 @@
 /* reset margin */
-.prose h1,
-h2,
-p {
+.prose-editor h1,
+.prose-editor h2,
+.prose-editor p {
     margin: 0 !important;
 }
 

@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-16 p-2 bg-gray-100 border-b border-gray-300">
-        <div class="hidden md:flex items-center justify-between">
+        <div class="flex items-center justify-between">
             <slot></slot>
         </div>
         <div>
@@ -8,3 +8,16 @@
         </div>
     </div>
 </template>
+
+<style>
+/* responsiveness */
+
+/* .no-mobile */
+
+@media (max-width: 768px) {
+    .no-mobile {
+        display: none;
+    }
+}
+
+</style>

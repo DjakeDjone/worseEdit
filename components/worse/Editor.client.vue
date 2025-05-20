@@ -21,6 +21,7 @@ import CharacterCount from '@tiptap/extension-character-count'
 import { Color } from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
+import { convertToMarkdown, convertToMarkdownWithTags } from "~/util/htmlToMd";
 
 
 
@@ -40,6 +41,7 @@ import Highlight from '@tiptap/extension-highlight'
 // lowlight.register('css', css)
 // lowlight.register('js', js)
 // lowlight.register('ts', ts)
+
 
 
 // Custom Page Break Extension
@@ -88,6 +90,7 @@ const props = defineProps({
 const emit = defineEmits(['change']);
 
 const scale = ref(1);
+const showDiff = ref(false);
 
 const doc = new Y.Doc()
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'; // TODO: replace with nuxt directive
@@ -170,7 +173,7 @@ onBeforeUnmount(() => {
     <div class="w-full no-animate">
         <slot name="editor-actions">
             <Tabs value="0" class="sticky top-0 z-50 backdrop-blur-md">
-                <TabList>
+                <TabList class="max-w-full">
                     <Tab value="-1">
                         File
                     </Tab>
@@ -200,18 +203,35 @@ onBeforeUnmount(() => {
                     <TabPanel value="2">
                         <WorseHeaderLayout :editor="editor" :fileName="props.fileName" />
                     </TabPanel>
+                    <TabPanel value="3">
+                        <WorseHeaderView :editor="editor" :fileName="props.fileName" v-model:show-diff="showDiff" />
+                    </TabPanel>
                 </TabPanels>
             </Tabs>
         </slot>
-        <div class="w-full flex justify-center max-w-full overflow-x-auto xl:p-4 2xl:py-8">
+        <div v-auto-animate class="w-full flex justify-center gap-2 max-w-full overflow-x-auto xl:p-4 2xl:py-8">
             <Card class="px-[4rem] w-[793px]" :style="{ transform: `scale(${scale})`, transformOrigin: 'top left' }">
                 <template #header>
                     <div class="h-10 flex items-center justify-between">
-
                     </div>
                 </template>
                 <template #content>
-                    <TiptapEditorContent :editor="editor" class="prose max-w-[100vw] *:w-full" />
+                    <TiptapEditorContent :editor="editor" class="prose prose-editor max-w-[100vw] *:w-full" />
+                </template>
+            </Card>
+            <Card class="px-[4rem] w-[793px]" :style="{ transform: `scale(${scale})`, transformOrigin: 'top left' }"
+                v-if="editor && showDiff">
+                <!-- {{ convertToMarkdown(modelValue) }} -->
+                <template #header>
+                    <div class="h-10 flex items-center justify-between">
+                        <div class="w-full h-0.5 bg-gray-300"></div>
+                    </div>
+                </template>
+                <template #content>
+                    <div class="prose text-start">
+                        <!-- {{ convertToMarkdownWithTags(editor.getHTML()) }} -->
+                        <span v-html="convertToMarkdownWithTags(editor.getHTML())"></span>
+                    </div>
                 </template>
             </Card>
         </div>

@@ -36,7 +36,7 @@ const setTransparentSelection = (transparent: boolean) => {
             </Button>
         </ButtonGroup>
 
-        <Dropdown :class="{ 'p-button-active': editor.isActive('heading', { level: 1 }) }" :options="[
+        <Dropdown class="no-mobile" :class="{ 'p-button-active': editor.isActive('heading', { level: 1 }) }" :options="[
             { label: 'H1', command: () => editor.chain().focus().toggleHeading({ level: 1 }).run() },
             { label: 'H2', command: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
             { label: 'H3', command: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
@@ -81,7 +81,7 @@ const setTransparentSelection = (transparent: boolean) => {
             </Button>
         </div>
 
-        <Dropdown
+        <Dropdown class="no-mobile"
             :class="{ 'p-button-active': editor.isActive('bulletList') || editor.isActive('orderedList') || editor.isActive('taskList') }"
             :options="[
                 { label: 'Bullet List', command: () => editor.chain().focus().toggleBulletList().run() },

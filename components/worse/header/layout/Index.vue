@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <WorseHeaderContainer>
         layout
-    </div>
+    </WorseHeaderContainer>
 </template>
