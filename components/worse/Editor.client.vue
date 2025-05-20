@@ -173,7 +173,7 @@ onBeforeUnmount(() => {
     <div class="w-full no-animate">
         <slot name="editor-actions">
             <Tabs value="0" class="sticky top-0 z-50 backdrop-blur-md">
-                <TabList class="max-w-full">
+                <TabList class="max-w-full small-tabs">
                     <Tab value="-1">
                         File
                     </Tab>
@@ -209,8 +209,9 @@ onBeforeUnmount(() => {
                 </TabPanels>
             </Tabs>
         </slot>
-        <div v-auto-animate class="w-full flex justify-center gap-2 max-w-full overflow-x-auto xl:p-4 2xl:py-8">
-            <Card class="px-[4rem] w-[793px]" :style="{ transform: `scale(${scale})`, transformOrigin: 'top left' }">
+        <div class="w-full flex flex-col xl:flex-row justify-center gap-2 max-w-full overflow-x-auto xl:p-4 2xl:py-8">
+            <Card class="px-[4rem] w-[793px]" :style="{ transform: `scale(${scale})`, overflow: 'hidden' }"
+                v-if="editor">
                 <template #header>
                     <div class="h-10 flex items-center justify-between">
                     </div>
@@ -219,21 +220,23 @@ onBeforeUnmount(() => {
                     <TiptapEditorContent :editor="editor" class="prose prose-editor max-w-[100vw] *:w-full" />
                 </template>
             </Card>
-            <Card class="px-[4rem] w-[793px]" :style="{ transform: `scale(${scale})`, transformOrigin: 'top left' }"
-                v-if="editor && showDiff">
-                <!-- {{ convertToMarkdown(modelValue) }} -->
-                <template #header>
-                    <div class="h-10 flex items-center justify-between">
-                        <div class="w-full h-0.5 bg-gray-300"></div>
-                    </div>
-                </template>
-                <template #content>
-                    <div class="prose text-start">
-                        <!-- {{ convertToMarkdownWithTags(editor.getHTML()) }} -->
-                        <span v-html="convertToMarkdownWithTags(editor.getHTML())"></span>
-                    </div>
-                </template>
-            </Card>
+            <div class="transition-all w-0" :class="{ 'w-[calc(793px)]': showDiff }">
+                <Card class="px-[4rem] w-[calc(793px-4rem)]"
+                    :style="{ transform: `scale(${scale})`, overflow: 'hidden' }" v-if="editor && showDiff">
+                    <!-- {{ convertToMarkdown(modelValue) }} -->
+                    <template #header>
+                        <div class="h-10 flex items-center justify-between">
+                            <div class="w-full h-0.5 bg-gray-300"></div>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="prose text-start">
+                            <!-- {{ convertToMarkdownWithTags(editor.getHTML()) }} -->
+                            <span v-html="convertToMarkdownWithTags(editor.getHTML())"></span>
+                        </div>
+                    </template>
+                </Card>
+            </div>
         </div>
         <div class="sticky bottom-0 z-50 backdrop-blur-md">
             <slot name="bottomNav">
@@ -245,6 +248,19 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
+
+/* tab */
+.small-tabs .p-tab {
+    padding: 0.2rem !important;
+}
+.small-tabs > div > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+/* end tab */
+
+
 .page-break-indicator {
     border: none;
     /* border-top: 1px dashed #000; */
