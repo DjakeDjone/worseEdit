@@ -72,6 +72,66 @@ const PageBreakNode = Node.create({
     },
 })
 
+// suggestion extension
+const completionNode = Node.create({
+    name: 'completion',
+    group: 'block',
+    atom: true,
+    selectable: true,
+    draggable: true,
+
+    addAttributes() {
+        return {
+            text: {
+                default: '',
+                parseHTML: element => element.getAttribute('data-completion-text') || element.innerText,
+                renderHTML: attributes => {
+                    // This attribute is mainly for data persistence in HTML.
+                    // The actual display is handled by the node's renderHTML.
+                    return { 'data-completion-text': attributes.text };
+                },
+            },
+        };
+    },
+
+    parseHTML() {
+        return [
+            {
+                tag: 'div[data-type="completion"]',
+            },
+        ];
+    },
+
+    renderHTML({ node, HTMLAttributes }) {
+        return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'completion' }), node.attrs.text || ''];
+    },
+
+    addCommands() {
+        return {
+            setCompletion: (text) => ({ commands, editor }) => {
+                if (editor.isActive(this.name)) {
+                    // If a completion node is already active (e.g., selected or cursor within),
+                    // update its text attribute.
+                    return commands.updateAttributes(this.name, { text: text || '' });
+                } else {
+                    // Otherwise, insert a new completion node.
+                    return commands.insertContent({
+                        type: this.name,
+                        attrs: { text: text || '' },
+                    });
+                }
+            },
+        };
+    },
+
+    addKeyboardShortcuts() {
+        return {
+            // Mod-Enter will insert/update an empty completion block at the current position.
+            'Mod-Enter': () => this.editor.commands.setCompletion(''),
+        };
+    },
+})
+
 const modelValue = defineModel()
 const props = defineProps({
     fileName: {
@@ -153,7 +213,8 @@ const editor = useEditor({
         Table.configure({
             resizable: true,
         }),
-        PageBreakNode, // Add the custom extension here
+        PageBreakNode, // my custom extension
+        completionNode, // my custom extension
     ],
     onUpdate({ editor }) {
         modelValue.value = editor.getHTML()
@@ -189,6 +250,9 @@ onBeforeUnmount(() => {
                     <Tab value="3">
                         View
                     </Tab>
+                    <Tab value="4">
+                        AI
+                    </Tab>
                 </TabList>
                 <TabPanels class="!p-0" v-auto-animate>
                     <TabPanel value="-1">
@@ -206,6 +270,9 @@ onBeforeUnmount(() => {
                     <TabPanel value="3">
                         <WorseHeaderView :editor="editor" :fileName="props.fileName" v-model:show-diff="showDiff" />
                     </TabPanel>
+                    <TabPanel value="4">
+                        <WorseHeaderAi :editor="editor" :fileName="props.fileName" :pageRef="editorRef" />
+                    </TabPanel>
                 </TabPanels>
             </Tabs>
         </slot>
@@ -217,7 +284,7 @@ onBeforeUnmount(() => {
                     </div>
                 </template>
                 <template #content>
-                    <TiptapEditorContent :editor="editor" class="prose prose-editor max-w-[100vw] *:w-full" />
+                    <TiptapEditorContent ref="editorRef" :editor="editor" class="prose prose-editor max-w-[100vw] *:w-full" />
                 </template>
             </Card>
             <div class="transition-all w-0" :class="{ 'w-[calc(793px)]': showDiff }">
@@ -248,16 +315,17 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
-
 /* tab */
 .small-tabs .p-tab {
     padding: 0.2rem !important;
 }
-.small-tabs > div > div {
+
+.small-tabs>div>div {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
 }
+
 /* end tab */
 
 

@@ -32,7 +32,9 @@ const scale = defineModel('scale', {
             <Button variant="text" @click="scale += 0.1" class="cursor-pointer">
                 +
             </Button>
-            {{ scale * 100 | 0 }}%
+            <span @click="scale=1" class="cursor-pointer w-12">
+                {{ scale * 100 | 0 }}%
+            </span>
         </div>
     </div>
 </template>
