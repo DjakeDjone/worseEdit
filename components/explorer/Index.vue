@@ -19,7 +19,7 @@ const reload = () => {
 };
 
 const onDelete = async (id: string) => {
-   // remove from user
+    // remove from user
     if (user.value && user.value.files) {
         user.value.files = user.value.files.filter(file => file.fileId !== id);
         // remove id from currentPath
@@ -32,9 +32,9 @@ const onDelete = async (id: string) => {
 <template>
     <div>
         <div class="flex justify-between items-center mb-4">
-            <span>
+            <h2>
                 Explorer
-            </span>
+            </h2>
             <div class="gap-2 flex">
                 <ExplorerCreateDoc :currentPath="currentPath" />
                 <Button variant="text" @click="reload">
@@ -42,13 +42,13 @@ const onDelete = async (id: string) => {
                 </Button>
             </div>
         </div>
-        <ExplorerViewBreadcrumb v-model:currentPath="currentPath"  />
-        <ExplorerViewFolder v-for="folder,i in splitExplorer(user)" :key="folder.name" :folder="folder" :index="i" @delete="onDelete($event)"
-            v-model:currentPath="currentPath" />
-        <!-- <pre>
-            <code v-if="user">
-                {{ JSON.stringify(splitExplorer(user), null, 2) }}
-            </code>
-        </pre> -->
+        <slot name="recentFiles">
+            <ExplorerRecent @delete="onDelete" />
+        </slot>
+        <ExplorerViewBreadcrumb v-model:currentPath="currentPath" />
+        <div class="rounded-lg p-4 bg-background-50/10 backdrop-blur-2xl">
+            <ExplorerViewFolder v-for="folder, i in splitExplorer(user)" :key="folder.name" :folder="folder" :index="i"
+                @delete="onDelete($event)" v-model:currentPath="currentPath" />
+        </div>
     </div>
 </template>

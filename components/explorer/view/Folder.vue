@@ -26,6 +26,14 @@ const deleteFile = async (id: string) => {
     }
 }
 
+watch(() => currentPath, (newPath) => {
+    if (newPath.value!.startsWith(props.folder.path)) {
+        opened.value = true;
+    } else {
+        opened.value = false;
+    }
+}, { immediate: true });
+
 </script>
 
 <template>
@@ -46,7 +54,7 @@ const deleteFile = async (id: string) => {
             <li v-for="file in folder.files" :key="file.name" class="flex gap-2 pl-1">
                 <Icon name="clarity:child-arrow-line" />
                 <div
-                    class="grid sm:grid-cols-2 md:grid-cols-3 gap-2 items-center hover:outline-1 outline-gray-300 rounded m-1 p-1 w-full max-w-xl">
+                    class="grid sm:grid-cols-2 md:grid-cols-3 gap-2 items-center hover:outline-1 outline-gray-300 rounded m-1 p-1 w-full">
                     <span>
                         <Icon name="mdi:file-document" class="inline-block mr-1" />
                         {{ file.name }}

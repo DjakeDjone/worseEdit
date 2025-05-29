@@ -14,11 +14,33 @@ const pathItems = computed(() => {
     });
 });
 
+const editableContainerRef = ref<HTMLElement | null>(null);
+const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        if (editableContainerRef.value) {
+            const newPath = editableContainerRef.value.textContent?.trim() || '';
+            if (newPath) {
+                currentPath.value = newPath;
+            }
+            // replace the content with the new path
+            Array.from(editableContainerRef.value.children).forEach(child => {
+                if (child.nodeType === Node.TEXT_NODE) {
+                    child.textContent = '';
+                } else if (child instanceof HTMLElement) {
+                    child.textContent = '';
+                }
+            });
+        }
+    }
+};
+
 </script>
 
 <template>
     <div>
-        <div class="flex items-center">
+        {{ currentPath }}
+        <div class="flex items-center border p-1" ref="editableContainerRef" @keydown="handleKeyDown">
             ~
             <div v-for="(item, index) in pathItems" :key="index" @click="currentPath = item.path">
                 <span class="hover:text-blue-500 cursor-pointer">{{ item.label }}</span>
