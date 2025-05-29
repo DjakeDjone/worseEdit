@@ -2,23 +2,34 @@
 import type { FileMeta } from '~/server/model/folder';
 import type { Folder } from '~/util/folderHelper';
 
+const { deleteDoc } = useDocHelper();
 
 const props = defineProps<{
     folder: Folder;
     index: number;
 }>();
 
-const emit = defineEmits<{
-    (e: 'delete', file: FileMeta): void;
-}>();
-
 const currentPath = defineModel<string>('currentPath');
 const opened = ref(false);
+
+const emit = defineEmits<{
+    (e: 'delete', id: string): void;
+}>();
+
+const deleteFile = async (id: string) => {
+    try {
+        await deleteDoc(id);
+        emit('delete', id);
+    } catch (error) {
+        console.error('Failed to delete file:', error);
+        // TODO: Show error message to user
+    }
+}
 
 </script>
 
 <template>
-    <div v-auto-animate>
+    <div v-auto-animate class="w-full">
         <h3 class="underline cursor-pointer flex items-center gap-1"
             :class="{ 'text-blue-500': currentPath === folder.path }"
             @click="currentPath = folder.path; opened = !opened">
@@ -30,11 +41,12 @@ const opened = ref(false);
         <ul class="pl-1 overflow-hidden" v-if="opened">
             <li v-for="subFolder in folder.children" :key="subFolder.name" class="flex">
                 <Icon name="clarity:child-arrow-line" />
-                <ExplorerViewFolder :folder="subFolder" v-model:current-path="currentPath" :index="index" />
+                <ExplorerViewFolder :folder="subFolder" v-model:current-path="currentPath" :index="index" @delete="emit('delete', $event)" />
             </li>
             <li v-for="file in folder.files" :key="file.name" class="flex gap-2 pl-1">
                 <Icon name="clarity:child-arrow-line" />
-                <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2 items-center hover:outline-1 outline-gray-300 rounded m-1 p-1 w-full">
+                <div
+                    class="grid sm:grid-cols-2 md:grid-cols-3 gap-2 items-center hover:outline-1 outline-gray-300 rounded m-1 p-1 w-full max-w-xl">
                     <span>
                         <Icon name="mdi:file-document" class="inline-block mr-1" />
                         {{ file.name }}
@@ -53,7 +65,7 @@ const opened = ref(false);
                                 <Icon name="mdi:open-in-new" />
                             </Button>
                         </NuxtLink>
-                        <Button variant="text" severity="danger" @click="$emit('delete', file)" size="small">
+                        <Button variant="text" severity="danger" @click="deleteFile(file.fileId)" size="small">
                             <Icon name="mdi:delete" />
                         </Button>
                     </div>

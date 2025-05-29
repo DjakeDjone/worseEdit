@@ -168,6 +168,19 @@ export const useUsersHandler = () => {
         return user;
     }
 
+    const removeFileFromUser = async (userId: string, fileId: string) => {
+        const user = await getUserUnsafe(userId);
+        if (!user) {
+            throw new Error("User not found or invalid token");
+        }
+        if (!user.files) {
+            throw new Error("User has no files");
+        }
+        user.files = user.files.filter((file) => file.fileId !== fileId);
+        await updateUser(userId, user);
+        return user;
+    }
+
     return {
         init,
         getUser,
@@ -178,5 +191,6 @@ export const useUsersHandler = () => {
         getUserByName,
         addFileToUser,
         getUserByCookieWs,
+        removeFileFromUser,
     }
 };

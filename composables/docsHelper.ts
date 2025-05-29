@@ -12,7 +12,16 @@ export const useDocHelper = () => {
         return res;
     }
 
+    const deleteDoc = async (id: string) => {
+        const res = await useNuxtApp().$api<Doc>("/api/editor/" + id, {
+            method: "DELETE",
+            credentials: "include",
+        });
+        return res;
+    }
+
     return {
         createDoc,
+        deleteDoc,
     }
 }

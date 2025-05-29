@@ -18,6 +18,15 @@ const reload = () => {
     loadMe();
 };
 
+const onDelete = async (id: string) => {
+   // remove from user
+    if (user.value && user.value.files) {
+        user.value.files = user.value.files.filter(file => file.fileId !== id);
+        // remove id from currentPath
+        currentPath.value = currentPath.value.split('/').filter(part => part !== id).join('/');
+    }
+};
+
 </script>
 
 <template>
@@ -34,7 +43,7 @@ const reload = () => {
             </div>
         </div>
         <ExplorerViewBreadcrumb v-model:currentPath="currentPath"  />
-        <ExplorerViewFolder v-for="folder,i in splitExplorer(user)" :key="folder.name" :folder="folder" :index="i"
+        <ExplorerViewFolder v-for="folder,i in splitExplorer(user)" :key="folder.name" :folder="folder" :index="i" @delete="onDelete($event)"
             v-model:currentPath="currentPath" />
         <!-- <pre>
             <code v-if="user">

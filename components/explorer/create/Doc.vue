@@ -24,7 +24,7 @@ const fileName = ref<string>('New File');
 const createFile = async () => {
     const res = await docHandler.createDoc({
         // name: 'New File',
-        name: props.currentPath + fileName.value,
+        name: props.currentPath +"/"+ fileName.value,
     }, user.value);
     if (res) {
         console.log('File created successfully:', res);

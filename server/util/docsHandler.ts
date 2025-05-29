@@ -61,7 +61,7 @@ export const useDocsHandler = () => {
         const id = crypto.randomUUID();
         const newBaseDoc = {
             ...doc,
-            content: "",
+            content: "<h1>Worse Doc</h1>",
             users: [],
         } as DocData
         const newDoc: Doc = generateDbEntry<DocData>(id, newBaseDoc);
@@ -123,12 +123,16 @@ export const useDocsHandler = () => {
     /// @returns true if successful
     /// @throws Error if doc does not exist
     const deleteDoc = async (id: string, userId: string) => {
-        const existingDoc = await db.getItem<Doc>(tableName + id);
+        const existingDoc = await getDoc(id);
         if (!existingDoc) {
             throw new Error("Doc does not exist");
         }
-        // TODO: check permissions
+        if (!existingDoc.users.some((u) => u.userId === userId && u.permission === Permission.ADMIN)) {
+            throw new Error("User does not have permission to delete this document");
+        }
         await db.removeItem(tableName + ":" + id);
+        // remove from user
+        await userHandler.removeFileFromUser(userId, id);
         return true;
     }
 

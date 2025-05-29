@@ -11,12 +11,12 @@ export default defineEventHandler(async (event) => {
     // }
 
     const { getDoc } = useDocsHandler();
-    const docName = getRouterParam(event, "name");
-    if (!docName) {
+    const docId = getRouterParam(event, "id");
+    if (!docId) {
         setResponseStatus(event, 400);
         return;
     }
-    const doc = await getDoc(docName);
+    const doc = await getDoc(docId);
     if (!doc) {
         setResponseStatus(event, 404);
         return;
