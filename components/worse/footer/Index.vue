@@ -20,7 +20,7 @@ const scale = defineModel('scale', {
 
 
 <template>
-    <div class="mt-4 px-4 py-2 border-t border-gray-300 flex items-center justify-between">
+    <div class="mt-4 px-2 border-t border-gray-300 flex items-center justify-between">
         <span class="w-fit">
             {{ editor.storage.characterCount.words() }} w<span class="hidden sm:inline-block">ords</span><span class="sm:hidden">.</span>
             <span class="hidden md:inline-block">, {{ editor.storage.characterCount.characters() }} chars</span>

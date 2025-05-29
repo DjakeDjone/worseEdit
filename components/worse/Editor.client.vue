@@ -109,6 +109,10 @@ const completionNode = Node.create({
     addCommands() {
         return {
             setCompletion: (text) => ({ commands, editor }) => {
+                if (!editor) {
+                    console.warn('Editor instance is not available.');
+                    return false;
+                }
                 if (editor.isActive(this.name)) {
                     return commands.updateAttributes(this.name, { text: text || '' });
                 } else {
@@ -156,9 +160,15 @@ const provider = new WebsocketProvider(`${protocol}//${location.host}/api/editor
 
 provider.on('status', (event) => {
     if (event.status === 'disconnected') {
-        // Handle disconnection, possibly an error or server down
-        console.error('WebSocket disconnected. Redirecting to /notFound');
-        useRouter().push('/notFound');
+        // check if it was a disconnection or an error
+        if (event.error) {
+            // Handle error
+            console.error('WebSocket error:', event.error);
+            useRouter().push('/notFound?message=WebSocket connection error');
+        } else {
+            // Handle disconnection
+            console.warn('WebSocket disconnected');
+        }
     }
 })
 
@@ -238,7 +248,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="w-full no-animate">
-        <slot name="editor-actions">
+        <slot name="editor-actions" v-if="editor">
             <Tabs value="0" class="sticky top-0 z-50 backdrop-blur-md">
                 <TabList class="max-w-full small-tabs">
                     <Tab value="-1">
@@ -312,7 +322,7 @@ onBeforeUnmount(() => {
             </div>
         </div>
         <div class="sticky bottom-0 z-50 backdrop-blur-md">
-            <slot name="bottomNav">
+            <slot name="bottomNav" v-if="editor">
                 <WorseFooter :editor="editor" :fileName="props.fileName" v-model:scale="scale" />
             </slot>
         </div>
