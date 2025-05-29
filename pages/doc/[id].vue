@@ -13,11 +13,15 @@ const fileName = computed(() => {
 
 <template>
     <main class="mx-auto p-4">
-        <div class="mb-4">
-            <NuxtLink to="/">
-                <h1 class="text-2xl font-bold mb-4">WOrse Editor</h1>
-            </NuxtLink>
-            <h2 class="text-xl">Welcome {{ user ? user.name : 'Developer' }}!</h2>
+        <div class="mb-4 flex items-center justify-between">
+            <WorseLogo>
+                
+            </WorseLogo>
+            <h2 class="text-xl">User 
+                <span class="bg-green-200">
+                    {{ user ? user.name : 'Developer' }}
+                </span>
+            </h2>
         </div>
 
         

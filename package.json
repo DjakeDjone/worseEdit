@@ -61,6 +61,7 @@
     "@tailwindcss/postcss": "^4.1.7",
     "@tailwindcss/typography": "^0.5.16",
     "@types/markdown-it": "^14.1.2",
+    "nuxt-time": "^1.0.3",
     "nuxt-tiptap-editor": "^2.2.1"
   }
 }

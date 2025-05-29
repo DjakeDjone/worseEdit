@@ -12,6 +12,11 @@ const docHandler = useDocHelper();
 
 const currentPath = ref<string>('/');
 
+const reload = () => {
+    currentPath.value = '/';
+    user.value = null;
+    loadMe();
+};
 
 </script>
 
@@ -23,13 +28,13 @@ const currentPath = ref<string>('/');
             </span>
             <div class="gap-2 flex">
                 <ExplorerCreateDoc :currentPath="currentPath" />
-                <Button variant="text" @click="loadMe">
+                <Button variant="text" @click="reload">
                     <Icon name="mdi:refresh" />
                 </Button>
             </div>
         </div>
         <ExplorerViewBreadcrumb v-model:currentPath="currentPath"  />
-        <ExplorerViewFolder v-for="folder in splitExplorer(user)" :key="folder.name" :folder="folder"
+        <ExplorerViewFolder v-for="folder,i in splitExplorer(user)" :key="folder.name" :folder="folder" :index="i"
             v-model:currentPath="currentPath" />
         <!-- <pre>
             <code v-if="user">

@@ -8,14 +8,8 @@ export default defineNuxtConfig({
   // app: {
   //   pageTransition: { name: 'page', mode: 'out-in' }
   // },
-  modules: [
-    // '@nuxtjs/tailwindcss',
-    '@vueuse/nuxt',
-    '@formkit/auto-animate',
-    '@primevue/nuxt-module',
-    'nuxt-tiptap-editor',
-    '@nuxt/icon'
-  ],
+  modules: [// '@nuxtjs/tailwindcss',
+  '@vueuse/nuxt', '@formkit/auto-animate', '@primevue/nuxt-module', 'nuxt-tiptap-editor', '@nuxt/icon', 'nuxt-time'],
   css: ['~/assets/main.css'],
   primevue: {
     importTheme: { from: '@/themes/maintheme.ts' },

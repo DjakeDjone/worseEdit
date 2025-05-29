@@ -244,6 +244,9 @@ onBeforeUnmount(() => {
         console.error('Error during unmount:', error);
     }
 });
+
+const tabsCompact = ref(false);
+
 </script>
 
 <template>
@@ -269,8 +272,11 @@ onBeforeUnmount(() => {
                     <Tab value="4">
                         AI
                     </Tab>
+                    <Button variant="text" @click="tabsCompact = !tabsCompact">
+                        <Icon name="i-heroicons-chevron-double-left-solid" class="transition-all" :class="{ 'rotate-180': tabsCompact }" />
+                    </Button>
                 </TabList>
-                <TabPanels class="!p-0" v-auto-animate>
+                <TabPanels :class="{'!h-0':tabsCompact}" class="!p-0 overflow-hidden h-16 transition-all" v-auto-animate>
                     <TabPanel value="-1">
                         <WorseHeaderFile :editor="editor" :fileName="props.fileName" />
                     </TabPanel>
@@ -293,7 +299,7 @@ onBeforeUnmount(() => {
             </Tabs>
         </slot>
         <div class="w-full flex flex-col xl:flex-row justify-center gap-2 max-w-full overflow-x-auto xl:p-4 2xl:py-8">
-            <Card class="px-[4rem] w-[793px]" :style="{ transform: `scale(${scale})`, overflow: 'hidden' }"
+            <Card class="px-[4rem] w-[793px] min-h-screen" :style="{ transform: `scale(${scale})`, overflow: 'hidden' }"
                 v-if="editor">
                 <template #header>
                     <div class="h-10 flex items-center justify-between">
