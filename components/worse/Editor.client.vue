@@ -110,11 +110,8 @@ const completionNode = Node.create({
         return {
             setCompletion: (text) => ({ commands, editor }) => {
                 if (editor.isActive(this.name)) {
-                    // If a completion node is already active (e.g., selected or cursor within),
-                    // update its text attribute.
                     return commands.updateAttributes(this.name, { text: text || '' });
                 } else {
-                    // Otherwise, insert a new completion node.
                     return commands.insertContent({
                         type: this.name,
                         attrs: { text: text || '' },
@@ -225,8 +222,17 @@ const editor = useEditor({
 
 
 onBeforeUnmount(() => {
-    unref(editor).destroy();
-    provider.destroy();
+    try {
+
+        if (editor) {
+            unref(editor).destroy();
+        }
+        if (provider) {
+            unref(provider).destroy();
+        }
+    } catch (error) {
+        console.error('Error during unmount:', error);
+    }
 });
 </script>
 
@@ -271,7 +277,7 @@ onBeforeUnmount(() => {
                         <WorseHeaderView :editor="editor" :fileName="props.fileName" v-model:show-diff="showDiff" />
                     </TabPanel>
                     <TabPanel value="4">
-                        <WorseHeaderAi :editor="editor" :fileName="props.fileName" :pageRef="editorRef" />
+                        <WorseHeaderAi :editor="editor" :fileName="props.fileName" />
                     </TabPanel>
                 </TabPanels>
             </Tabs>
@@ -284,7 +290,7 @@ onBeforeUnmount(() => {
                     </div>
                 </template>
                 <template #content>
-                    <TiptapEditorContent ref="editorRef" :editor="editor" class="prose prose-editor max-w-[100vw] *:w-full" />
+                    <TiptapEditorContent :editor="editor" class="prose prose-editor max-w-[100vw] *:w-full" />
                 </template>
             </Card>
             <div class="transition-all w-0" :class="{ 'w-[calc(793px)]': showDiff }">
@@ -327,7 +333,10 @@ onBeforeUnmount(() => {
 }
 
 /* end tab */
-
+/* completion */
+div[data-type="completion"] {
+    opacity: 0.9;
+}
 
 .page-break-indicator {
     border: none;

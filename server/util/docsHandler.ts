@@ -1,11 +1,15 @@
-import { Doc, DocData, DocMeta, DocPermission } from "../model/doc";
+import { Doc, DocData, DocMeta } from "../model/doc";
 import { User } from "../model/user";
 import { generateDbEntry } from "../model/dbEntry";
 import * as Y from 'yjs';
+import { Permission } from "../model/permission";
+import { useUsersHandler } from "./usersHandler";
+import { generateFileMeta } from "../model/folder";
 
 export const useDocsHandler = () => {
     const tableName = "docs";
     const db = useStorage("data");
+    const userHandler = useUsersHandler();
 
     const init = async () => {
         // create 'public' file if not exists
@@ -55,20 +59,25 @@ export const useDocsHandler = () => {
     /// @throws Error if doc already exists
     const createDoc = async (doc: DocMeta, owner?: User) => {
         const id = crypto.randomUUID();
-        const newDoc = generateDbEntry<DocData>(id, {
+        const newBaseDoc = {
             ...doc,
             content: "",
             users: [],
-        });
+        } as DocData
+        const newDoc: Doc = generateDbEntry<DocData>(id, newBaseDoc);
         if (owner) {
             newDoc.users.push({
                 userId: owner.id,
-                permission: DocPermission.ADMIN,
+                permission: Permission.ADMIN,
             });
         } else {
             newDoc.public = true;
         }
         await db.setItem(tableName + ":" + id, newDoc);
+        // update user
+        if (owner) {
+            userHandler.addFileToUser(owner.id, generateFileMeta(newDoc));
+        }
         return newDoc;
     }
 
@@ -83,8 +92,10 @@ export const useDocsHandler = () => {
         if (!existingDoc) {
             throw new Error("Doc does not exist");
         }
+        // TODO: check permissions
         const updatedDoc = { ...existingDoc, ...doc, updatedAt: new Date() };
         await db.setItem(tableName + ":" + id, updatedDoc);
+        // TODO: update user 
         return updatedDoc;
     };
 
@@ -96,8 +107,6 @@ export const useDocsHandler = () => {
     const updateDocContent = async (id: string, content: string) => {
         const existingDoc = await db.getItem<Doc>(tableName + ":" + id);
         if (!existingDoc) {
-            // Or, depending on desired behavior, create it or log an error.
-            // For Yjs persistence, the doc should typically exist due to prior auth/setup.
             throw new Error(`Doc with id ${id} does not exist, cannot update content.`);
         }
         const updatedDoc: Doc = {
@@ -113,11 +122,12 @@ export const useDocsHandler = () => {
     /// @param id doc id
     /// @returns true if successful
     /// @throws Error if doc does not exist
-    const deleteDoc = async (id: string) => {
+    const deleteDoc = async (id: string, userId: string) => {
         const existingDoc = await db.getItem<Doc>(tableName + id);
         if (!existingDoc) {
             throw new Error("Doc does not exist");
         }
+        // TODO: check permissions
         await db.removeItem(tableName + ":" + id);
         return true;
     }

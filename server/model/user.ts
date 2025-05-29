@@ -1,6 +1,8 @@
 import { DbEntry } from "./dbEntry";
 import { Doc } from "./doc";
 import * as Y from "yjs";
+import { FileMeta } from "./folder";
+// import { Folder } from "./folder";
 
 export type AuthToken = {
     validTill: Date;
@@ -11,8 +13,9 @@ export type UserData = {
     name: string;
     token: string;
     authTokens?: AuthToken[];
-    // 
-    docs?: String[]; // doc ids, great for searching etc. !redundant!
+    // !folder is redundant!
+    // folderIds?: string[];
+    files?: FileMeta[];
 }
 
 export type User = UserData & DbEntry;
@@ -23,6 +26,8 @@ export type FrontendUser = {
 
     createdAt: Date;
     updatedAt: Date;
+
+    files?: FileMeta[];
 }
 
 export const fromUser = (user: User): FrontendUser => {
@@ -31,6 +36,7 @@ export const fromUser = (user: User): FrontendUser => {
         name: user.name,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
+        files: user.files,
     }
 }
 

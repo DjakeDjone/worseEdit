@@ -15,7 +15,8 @@ const fileName = ref("worse");
             <h2 class="text-xl">Welcome {{ user ? user.name : 'Developer' }}!</h2>
         </div>
 
-        <InputText v-model="fileName" label="File Name" placeholder="Enter file name" class="mb-4" :disabled="!user" />
-        <NuxtLink to="/doc" class="text-blue-500 hover:underline mb-4" v-if="user">Go to Document</NuxtLink>
+        <section>
+            <Explorer />
+        </section>
     </main>
 </template>

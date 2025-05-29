@@ -5,9 +5,9 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
-  app: {
-    pageTransition: { name: 'page', mode: 'out-in' }
-  },
+  // app: {
+  //   pageTransition: { name: 'page', mode: 'out-in' }
+  // },
   modules: [
     // '@nuxtjs/tailwindcss',
     '@vueuse/nuxt',

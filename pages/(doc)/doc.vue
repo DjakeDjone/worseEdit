@@ -11,7 +11,9 @@ const fileName = ref("public");
 <template>
     <main class="container mx-auto p-4">
         <div class="mb-4">
-            <h1 class="text-2xl font-bold mb-4">WOrse Editor</h1>
+            <NuxtLink to="/">
+                <h1 class="text-2xl font-bold mb-4">WOrse Editor</h1>
+            </NuxtLink>
             <h2 class="text-xl">Welcome {{ user ? user.name : 'Developer' }}!</h2>
         </div>
 

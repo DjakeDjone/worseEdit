@@ -7,6 +7,8 @@ export default defineEventHandler(async (event) => {
     const { getUserByCookie } = useUsersHandler();
     const user = await getUserByCookie(event);
     if (!user) {
+        console.warn("Unauthorized access attempt to create doc");
+        
         setResponseStatus(event, 401);
         return;
     }

@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
                 message: "Could not create user",
             });
         }
-        setAuthentificated(event, newUser);
+        await setAuthentificated(event, newUser);
         return fromUser(newUser);
 
     } catch (error: any) {

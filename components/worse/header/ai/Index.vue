@@ -34,6 +34,7 @@ const complete = async () => {
     status.value = 'loading';
     streamResponse.value = '';
     try {
+        
         // get the 12 lines before the cursor
         const cursor = props.editor.state.selection.$from;
         const start = Math.max(0, cursor.pos - 120);
@@ -47,7 +48,9 @@ const complete = async () => {
         }
 
         if (ops.value.provider === 'ollama') {
+            // abort previous request
             const ollama = new Ollama({ host: ops.value.baseUrl });
+            ollama.abort();
             const responseStream = await ollama.chat({
                 model: ops.value.model as string,
                 messages: [
@@ -66,7 +69,6 @@ const complete = async () => {
                 streamResponse.value += part.message.content;
                 // insert the response at the cursor position
                 props.editor.commands.setCompletion(
-                    // props.editor.state.selection.from,
                     streamResponse.value,
                 );
             }
@@ -99,16 +101,26 @@ const complete = async () => {
 }
 
 const acceptCompletion = async () => {
-    // get 
+    // 
 };
+
 
 const addCompletionsListener = () => {
     // add listener to the editor
     const body = document.querySelector('body');
     if (body) {
+        let lastKey = '';
         body.addEventListener('keydown', (event) => {
-            if (event.key === 'Tab') {
-                event.preventDefault();
+            if (event.key === ' ') {
+                // remove all completions
+                // check if the cursor is at the end of the line
+                // const cursor = props.editor.state.selection.$from;
+                // const line = props.editor.state.doc.lineAt(cursor.pos);
+                // if (cursor.pos === line.from + line.length) {
+                //     console.log('Cursor is at the end of the line');
+                //     complete();
+                // }
+                
                 complete();
             }
         });
@@ -139,6 +151,7 @@ watch(
             </div>
         </div>
         <ToggleSwitch v-model="completionsEnabled" />
+        {{ status }}
         <Button @click="complete">
             Complete
         </Button>
