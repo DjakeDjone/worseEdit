@@ -19,9 +19,9 @@ export default defineEventHandler(async (event) => {
         return fromUser(user);
     } catch (error: any) {
         throw createError({
-            statusCode: error.statusCode || 500,
-            statusMessage: error.statusMessage || "Internal Server Error",
-            message: error.message || "Could not retrieve user",
-        });
+                statusCode: 404,
+                statusMessage: "Not Found",
+                message: "User not found or token invalid",
+            });
     }
 });

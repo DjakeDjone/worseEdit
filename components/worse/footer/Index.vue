@@ -21,14 +21,15 @@ const scale = defineModel('scale', {
 
 <template>
     <div class="mt-4 px-4 py-2 border-t border-gray-300 flex items-center justify-between">
-        <span class="w-24">
-            {{ editor.storage.characterCount.words() }} words
+        <span class="w-fit">
+            {{ editor.storage.characterCount.words() }} w<span class="hidden sm:inline-block">ords</span><span class="sm:hidden">.</span>
+            <span class="hidden md:inline-block">, {{ editor.storage.characterCount.characters() }} chars</span>
         </span>
         <div class="flex items-center gap-2">
             <Button variant="text" @click="scale -= 0.1" class="cursor-pointer">
                 -
             </Button>
-            <Slider v-model="scale" :step=".01" :min="0.3" :max="3" class="w-42" />
+            <Slider v-model="scale" :step=".01" :min="0.3" :max="3" class="w-42 max-w-full hidden sm:block" />
             <Button variant="text" @click="scale += 0.1" class="cursor-pointer">
                 +
             </Button>

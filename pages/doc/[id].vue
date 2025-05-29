@@ -4,12 +4,15 @@ import { fakeUser, toYUser } from "@/server/model/user";
 const { user } = useUserHandler();
 
 const content = ref("<h1>Worse</h1><p>The better Editor! 🎉</p>");
-const fileName = ref("public");
+const route = useRoute();
+const fileName = computed(() => {
+    return route.params.id ? `${route.params.id}` : "public";
+});
 
 </script>
 
 <template>
-    <main class="container mx-auto p-4">
+    <main class="mx-auto p-4">
         <div class="mb-4">
             <NuxtLink to="/">
                 <h1 class="text-2xl font-bold mb-4">WOrse Editor</h1>
@@ -18,7 +21,7 @@ const fileName = ref("public");
         </div>
 
         
-        <div class="rounded-lg p-4 bg-white shadow-sm">
+        <div class="rounded-lg md:p-4 bg-white shadow-sm">
             <ClientOnly>
                 <WorseEditor v-model="content" :fileName="fileName" :user="toYUser(user?user:fakeUser)" />
             </ClientOnly>

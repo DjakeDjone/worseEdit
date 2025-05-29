@@ -102,6 +102,41 @@ export const useUsersHandler = () => {
         return user;
     }
 
+    const validateUserByToken = async (id: string, token: string): Promise<User | null> => {
+        const user = await getUserUnsafe(id);
+        if (!user) {
+            return null;
+        }
+
+        const validToken = user.authTokens?.find((t) => t.token === token);
+        if (!validToken) {
+            return null;
+        }
+
+        if (validToken.validTill < new Date()) {
+            console.log(`Token expired for user ${user.name}`);
+            user.authTokens = user.authTokens?.filter((t) => t.token !== token);
+            await db.setItem(tableName + ":" + id, user);
+            return null;
+        }
+
+        return user;
+    }
+
+    const getUserByCookieWs = async (req: Request) => {
+        const authToken = req.headers.get("cookie")?.split("; ").find(c => c.startsWith("auth-token="))?.split("=")[1];
+        const authTokenEncoded = authToken ? decodeURIComponent(authToken) : null;
+        console.log(`getUserByCookieWs: ${authTokenEncoded}`);
+        
+
+        if (!authTokenEncoded) {
+            return null;
+        }
+        const [id, token] = authTokenEncoded.split(":");
+        console.log(`getUserByCookieWs: id: ${id}, token: ${token}`);
+        return validateUserByToken(id, token);
+    }
+
     const getUserByCookie = async (event: any) => {
         const authToken = getCookie(event, "auth-token");
         console.log(`getUserByCookie: ${authToken}`);
@@ -112,21 +147,8 @@ export const useUsersHandler = () => {
         const [id, token] = authToken.split(":");
         console.log(`getUserByCookie: id: ${id}, token: ${token}`);
 
-        const user = await getUserUnsafe(id);
+        const user = await validateUserByToken(id, token);
         if (!user) {
-            // remove the cookie
-            deleteCookie(event, "auth-token");
-            return null;
-        }
-        const validToken = user.authTokens?.find((t) => t.token === token);
-        if (!validToken) {
-            return null;
-        }
-        if (validToken.validTill < new Date()) {
-            console.log(`getUserByCookie: token expired for user ${user.name}`);
-            // token is expired
-            user.authTokens = user.authTokens?.filter((t) => t.token !== token);
-            await db.setItem(id, user);
             deleteCookie(event, "auth-token");
             return null;
         }
@@ -155,5 +177,6 @@ export const useUsersHandler = () => {
         getUserByCookie,
         getUserByName,
         addFileToUser,
+        getUserByCookieWs,
     }
 };

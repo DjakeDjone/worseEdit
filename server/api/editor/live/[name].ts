@@ -201,7 +201,7 @@ export const getYDoc = (docname: string, gc = true): WSSharedDoc =>
 export const getYDocName = (peer: Peer<AdapterInternal>) => {
     const urlParts = peer.websocket.url?.split('?')[0].split('/')
     if (!urlParts || urlParts.length < 2) {
-        return 'default-room' // Fallback room name
+        return 'public' // Fallback room name
     }
     const roomName = urlParts[urlParts.length - 1] // Extract the last part of the URL
     return roomName
@@ -212,17 +212,16 @@ export default defineWebSocketHandler({
     async open(peer) {
         console.log('[ws] open')
         const roomName = getYDocName(peer);
-        const { getUserByCookie } = useUsersHandler();
+        const { getUserByCookieWs } = useUsersHandler();
         const { getDoc: getDbDoc, checkDocPermissions } = useDocsHandler(); // Renamed to avoid conflict
 
         try {
             let user = null; // Initialize user as null
 
-            // @ts-ignore: peer.event is available in crossws from H3Event, but might be undefined
-            if (peer.event && typeof peer.event === 'object') {
+            if (peer.request && typeof peer.request === 'object') {
                 try {
                     // @ts-ignore: peer.event is available in crossws from H3Event
-                    user = await getUserByCookie(peer.event);
+                    user = await getUserByCookieWs(peer.request);
                 } catch (e: any) {
                     // Log error from getUserByCookie if it throws (e.g. 'Cannot read properties of undefined (reading 'node')')
                     // Treat as anonymous and proceed to check document permissions (e.g. public access)
@@ -237,6 +236,9 @@ export default defineWebSocketHandler({
             const dbDoc = await getDbDoc(roomName);
             if (!dbDoc) {
                 console.error(`[ws] Unauthorized: Document ${roomName} not found for peer:`, peer.id);
+                // sleep for 100ms to avoid rapid close/reopen loops
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
                 peer.close(1008, `Unauthorized: Document ${roomName} not found`);
                 return;
             }
@@ -251,6 +253,8 @@ export default defineWebSocketHandler({
                     console.log(`[ws] Document ${roomName} is public, allowing anonymous access for peer:`, peer.id);
                 } else {
                     console.error(`[ws] Unauthorized: Document ${roomName} is not public and no authenticated user found for peer:`, peer.id);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
                     peer.close(1008, `Unauthorized: Document ${roomName} requires authentication.`);
                     return;
                 }
