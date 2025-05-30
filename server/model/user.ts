@@ -16,6 +16,8 @@ export type UserData = {
     // !folder is redundant!
     // folderIds?: string[];
     files?: FileMeta[];
+    // inviteFiles?: InvitionFileMeta[];
+
 }
 
 export type User = UserData & DbEntry;
@@ -28,6 +30,7 @@ export type FrontendUser = {
     updatedAt: Date;
 
     files?: FileMeta[];
+    // inviteFiles?: FileMeta[];
 }
 
 export const fromUser = (user: User): FrontendUser => {
@@ -37,6 +40,7 @@ export const fromUser = (user: User): FrontendUser => {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         files: user.files,
+        // inviteFiles: user.inviteFiles,
     }
 }
 

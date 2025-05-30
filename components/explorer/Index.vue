@@ -10,10 +10,10 @@ onMounted(() => {
 const { user, loadMe } = useUserHandler();
 const docHandler = useDocHelper();
 
-const currentPath = ref<string>('/');
+const currentPath = ref<string>('');
 
 const reload = () => {
-    currentPath.value = '/';
+    currentPath.value = '';
     user.value = null;
     loadMe();
 };

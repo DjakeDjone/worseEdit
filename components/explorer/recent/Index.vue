@@ -34,27 +34,6 @@ const deleteFile = async (id: string) => {
             <h2 class="text-lg font-semibold mb-2">
                 Recent Files
             </h2>
-            <!-- <table class="w-full">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Last Edited</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="file in recentFiles" :key="file.fileId">
-                        <td>
-                            <div class="flex gap-1 items-center">
-                                <Icon name="mdi:file-document" />
-                                <span>{{ file.name }}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <NuxtTime v-if="file.lastEdited" :datetime="file.lastEdited" />
-                        </td>
-                    </tr>
-                </tbody>
-            </table> -->
             <DataTable :value="recentFiles" stripedRows showGridlines resizableColumns columnResizeMode="fit">
                 <Column field="name" header="Name" sortable frozen></Column>
                 <Column field="lastEdited" header="Last Edited" sortable>
@@ -67,6 +46,11 @@ const deleteFile = async (id: string) => {
                         <Button severity="danger" variant="text" @click="deleteFile(slotProps.data.fileId)" size="small">
                             <Icon name="mdi:delete" />
                         </Button>
+                        <NuxtLink :to="`/doc/${slotProps.data.fileId}`" class="ml-2">
+                            <Button variant="text">
+                                <Icon name="mdi:open-in-new" />
+                            </Button>
+                        </NuxtLink>
                     </template>
                 </Column>
             </DataTable>

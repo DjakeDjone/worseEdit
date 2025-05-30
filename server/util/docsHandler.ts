@@ -1,4 +1,4 @@
-import { Doc, DocData, DocMeta } from "../model/doc";
+import { Doc, DocData, DocMeta, SharingLink } from "../model/doc";
 import { User } from "../model/user";
 import { generateDbEntry } from "../model/dbEntry";
 import * as Y from 'yjs';
@@ -88,10 +88,7 @@ export const useDocsHandler = () => {
     /// @throws Error if doc does not exist
     const updateDoc = async (id: string, doc: DocData) => {
         // check if doc exists
-        const existingDoc = await db.getItem<Doc>(tableName + id);
-        if (!existingDoc) {
-            throw new Error("Doc does not exist");
-        }
+        const existingDoc = getDoc(id);
         // TODO: check permissions
         const updatedDoc = { ...existingDoc, ...doc, updatedAt: new Date() };
         await db.setItem(tableName + ":" + id, updatedDoc);
@@ -136,6 +133,58 @@ export const useDocsHandler = () => {
         return true;
     }
 
+    const inviteUserToDoc = async (docId: string, permission: Permission = Permission.READ, link: string, reusable: boolean = true) => {
+        const doc = await getDoc(docId);
+        if (!doc) {
+            throw new Error("Document not found");
+        }
+        // Add the user to the document's users
+        if (!doc.sharingLinks) {
+            doc.sharingLinks = [];
+        }
+        const sharingLink = {
+            link: link,
+            permission,
+            validTill: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // valid for 7 days
+            reusable: reusable,
+        } as SharingLink;
+        doc.sharingLinks.push(sharingLink);
+        // Save the updated document
+        updateDoc(docId, doc);
+        return doc;
+    }
+
+    const acceptUserInvite = async (docId: string, userId: string, link: string) => {
+        const doc = await getDoc(docId);
+        if (!doc) {
+            throw new Error("Document not found");
+        }
+        console.log(`Accepting invite for user ${userId} to doc ${docId} with link ${link}`);
+
+        const sharingLink = doc.sharingLinks?.find(l => l.link === link);
+        if (!sharingLink) {
+            throw new Error("Invalid sharing link");
+        }
+        if (sharingLink.validTill < new Date()) {
+            throw new Error("Sharing link has expired");
+        }
+        // Check if user already has access
+        if (doc.users.some(u => u.userId === userId)) {
+            throw new Error("User already has access to this document");
+        }
+        // Add user to document
+        doc.users.push({
+            userId: userId,
+            permission: sharingLink.permission,
+        });
+
+        if (!sharingLink.reusable) {
+            doc.sharingLinks = doc.sharingLinks?.filter(l => l.link !== link);
+        }
+        await updateDoc(docId, doc);
+        return doc;
+    }
+
 
     return {
         init,
@@ -143,7 +192,9 @@ export const useDocsHandler = () => {
         checkDocPermissions,
         createDoc,
         updateDoc,
-        updateDocContent, // Add new function here
+        updateDocContent,
         deleteDoc,
+        inviteUserToDoc,
+        acceptUserInvite,
     }
 }

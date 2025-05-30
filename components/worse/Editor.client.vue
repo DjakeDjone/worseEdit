@@ -250,7 +250,7 @@ const tabsCompact = ref(false);
 </script>
 
 <template>
-    <div class="w-full no-animate">
+    <div class="w-full">
         <slot name="editor-actions" v-if="editor">
             <Tabs value="0" class="sticky top-0 z-50 backdrop-blur-md">
                 <TabList class="max-w-full small-tabs">
@@ -273,10 +273,15 @@ const tabsCompact = ref(false);
                         AI
                     </Tab>
                     <Button variant="text" @click="tabsCompact = !tabsCompact">
-                        <Icon name="i-heroicons-chevron-double-left-solid" class="transition-all" :class="{ 'rotate-180': tabsCompact }" />
+                        <Icon name="i-heroicons-chevron-double-left-solid" class="transition-all"
+                            :class="{ 'rotate-180': tabsCompact }" />
                     </Button>
+                    <div class="ml-auto">
+                        <WorseHeaderShare :docId="fileName" />
+                    </div>
                 </TabList>
-                <TabPanels :class="{'!h-0':tabsCompact}" class="!p-0 overflow-hidden h-16 transition-all" v-auto-animate>
+                <TabPanels :class="{ '!h-0': tabsCompact }" class="!p-0 overflow-hidden h-16 transition-all"
+                    v-auto-animate>
                     <TabPanel value="-1">
                         <WorseHeaderFile :editor="editor" :fileName="props.fileName" />
                     </TabPanel>

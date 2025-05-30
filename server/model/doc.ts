@@ -1,6 +1,6 @@
 import * as Y from 'yjs'
 import { DbEntry } from './dbEntry';
-import { PermissionData } from './permission';
+import { Permission, PermissionData } from './permission';
 
 export type DocMeta = {
     name: string;
@@ -14,6 +14,13 @@ export type DocData = DocMeta & {
     users: PermissionData[]; // user ids
     public?: boolean; // if the document is public
 
-    sharingLink?: string; // link to share the document
+    sharingLinks?: SharingLink[]; // link to share the document
 };
 export type Doc = DbEntry & DocData;
+
+export type SharingLink = {
+    link: string;
+    permission: Permission;
+    validTill: Date; // when the link expires
+    reusable?: boolean;
+}

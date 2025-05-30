@@ -33,6 +33,8 @@ const createFile = async () => {
         }
         user.value.files?.push(generateFileMeta(res));
         emit('create', res);
+        fileName.value = 'New File'; // Reset the file name input
+        op.value?.hide(); // Hide the popover after creation
     } else {
         console.error('Failed to create file');
     }

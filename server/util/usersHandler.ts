@@ -1,5 +1,6 @@
 import { generateDbEntry } from "../model/dbEntry";
-import { FileMeta } from "../model/folder";
+import { Doc } from "../model/doc";
+import { FileMeta, generateFileMeta } from "../model/folder";
 import { User, UserData } from "../model/user";
 
 
@@ -181,6 +182,25 @@ export const useUsersHandler = () => {
         return user;
     }
 
+    const inviteUserToDoc = async (doc: Doc, userId: string, hostUser: User) => {
+        // const user = await getUserUnsafe(userId);
+        // if (!user) {
+        //     throw new Error("User not found");
+        // }
+
+        // if (!user.inviteFiles) {
+        //     user.inviteFiles = [];
+        // }
+        // const fileMeta: InvitionFileMeta = {
+        //     ...generateFileMeta(doc),
+        //     invitedBy: hostUser.id,
+        //     invitedAt: new Date(),
+        // }
+        // user.inviteFiles.push(fileMeta);
+        // await updateUser(userId, user);
+        // return user;
+    }
+
     return {
         init,
         getUser,
@@ -192,5 +212,8 @@ export const useUsersHandler = () => {
         addFileToUser,
         getUserByCookieWs,
         removeFileFromUser,
+        inviteUserToDoc,
+        getUserUnsafe, // careful with this, it does not check token
+        validateUserByToken,
     }
 };
