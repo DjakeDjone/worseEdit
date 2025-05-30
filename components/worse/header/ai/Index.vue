@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { AIClient, type AIClientOptions } from '@aivue/core';
-import { Ollama } from 'ollama';
+import { Ollama } from 'ollama/browser';
 
 const props = defineProps({
     editor: {
@@ -17,7 +16,7 @@ const props = defineProps({
     // },
 });
 
-const ops = ref<AIClientOptions>({
+const ops = ref({
     provider: 'ollama',
     model: 'gemma3:1b-it-qat',
     baseUrl: 'http://127.0.0.1:11434',
@@ -78,18 +77,18 @@ const complete = async () => {
             // );
 
         } else {
-            const client = new AIClient(ops.value);
-            const response = await client.chat(
-                [
-                    {
-                        role: 'user',
-                        content: text,
-                    },
-                ],
-            );
+            // const client = new AIClient(ops.value);
+            // const response = await client.chat(
+            //     [
+            //         {
+            //             role: 'user',
+            //             content: text,
+            //         },
+            //     ],
+            // );
 
-            console.log('Response:', response);
-            streamResponse.value = response;
+            // console.log('Response:', response);
+            // streamResponse.value = response;
         }
     } catch (error) {
         console.error('Error asking question:', error);

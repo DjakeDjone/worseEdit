@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FileUploadUploadEvent } from 'primevue/fileupload';
 import { convertToMarkdown } from '~/util/htmlToMd';
-import docx2html from "docx2html/lib/";
+// import docx2html from "docx2html/lib/";
 import MarkdownIt from 'markdown-it';
 
 
@@ -60,9 +60,9 @@ const uploadFile = async (event: Event) => {
     } else if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
         // Handle Word document upload
         try {
-            const html = await docx2html(file);
-            console.log('Converted HTML:', html);
-            props.editor.commands.setContent(html.toString());
+            // const html = await docx2html(file);
+            // console.log('Converted HTML:', html);
+            // props.editor.commands.setContent(html.toString());
         } catch (error) {
             console.error('Error converting DOCX to HTML:', error);
             alert('Error processing Word document.');

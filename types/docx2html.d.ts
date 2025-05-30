@@ -1,1 +1,1 @@
-declare module 'docx2html/lib/';
+// declare module 'docx2html/lib/';
