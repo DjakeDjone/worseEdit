@@ -33,6 +33,7 @@
     "@vueuse/core": "^13.3.0",
     "@vueuse/nuxt": "13.2.0",
     "crossws": "^0.3.5",
+    "crypto": "^1.0.1",
     "lib0": "^0.2.108",
     "lowlight": "^3.3.0",
     "markdown-it": "^14.1.0",
