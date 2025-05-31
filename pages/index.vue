@@ -13,7 +13,7 @@ const fileName = ref("worse");
         <div class="mb-4 prose">
             <WorseLogo>WORSE</WorseLogo>
             <p class="text-gray-600">A worse editor for your documents. It may be not the best editor,
-                but it is shurly not the worst. <br>
+                but it is surely not the worst. <br>
                 <NuxtLink to="about" class="text-red-500">
                     Or is it? 🤔
                 </NuxtLink>

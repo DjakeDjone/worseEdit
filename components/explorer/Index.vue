@@ -4,7 +4,7 @@ import type { User } from '~/server/model/user';
 import { splitExplorer } from '~/util/folderHelper';
 
 onMounted(() => {
-    loadMe();
+    reload();
 });
 
 const { user, loadMe } = useUserHandler();
@@ -12,10 +12,15 @@ const docHandler = useDocHelper();
 
 const currentPath = ref<string>('');
 
-const reload = () => {
+const reload = async() => {
     currentPath.value = '';
-    user.value = null;
-    loadMe();
+    try {
+        await loadMe();
+        
+    } catch (error) {
+        console.error('Failed to load user:', error);
+        useRouter().push('/login');
+    }
 };
 
 const onDelete = async (id: string) => {
