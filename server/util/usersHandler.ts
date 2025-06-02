@@ -4,19 +4,24 @@ import { FileMeta, generateFileMeta } from "../model/folder";
 import { User, UserData } from "../model/user";
 
 
+export const usernameCache = new Map<string, string>(); // username -> id
 
 export const useUsersHandler = () => {
     const tableName = "users";
     const db = useStorage("data"); // simple file kv
-    const userCache = new Map<string, string>(); // username -> id
 
     const init = async () => {
         // load all users from db
+        console.log("Initializing users handler");
+        
         const userIds = await db.getKeys(tableName);
-        for (const userId of userIds) {
-            const user = await db.getItem<User>(tableName + ":" + userId);
+        console.log(`Found ${userIds.length} users in db`);
+        
+        for (let userId of userIds) {
+            userId = userId.replace(tableName + ":", "");
+            const user = await getUserUnsafe(userId);
             if (user) {
-                userCache.set(user.name, userId);
+                usernameCache.set(user.name, userId);
             }
         }
     }
@@ -37,7 +42,7 @@ export const useUsersHandler = () => {
     }
 
     const getUserByName = async (name: string, token: string) => {
-        const userId = userCache.get(name);
+        const userId = usernameCache.get(name);        
         if (!userId) {
             return null;
         }
@@ -54,7 +59,7 @@ export const useUsersHandler = () => {
         const usr = generateDbEntry<UserData>(id, user);
 
         await db.setItem(tableName + ":" + id, usr);
-        userCache.set(usr.name, id);
+        usernameCache.set(usr.name, id);
         return usr;
     }
 
@@ -74,7 +79,7 @@ export const useUsersHandler = () => {
             throw new Error("Invalid token");
         }
         await db.setItem(tableName + ":" + id, user);
-        userCache.set(user.name, id);
+        usernameCache.set(user.name, id);
         return user;
     }
 

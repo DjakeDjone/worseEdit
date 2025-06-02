@@ -35,7 +35,14 @@ const deleteFile = async (id: string) => {
                 Recent Files
             </h2>
             <DataTable :value="recentFiles" stripedRows showGridlines resizableColumns columnResizeMode="fit">
-                <Column field="name" header="Name" sortable frozen></Column>
+                <Column field="name" header="Name" sortable frozen>
+                    <template #body="slotProps">
+                        <NuxtLink :to="`/doc/${slotProps.data.fileId}`" class="text-primary-500 hover:underline">
+                            {{ slotProps.data.name }}
+                        </NuxtLink>
+
+                    </template>
+                </Column>
                 <Column field="lastEdited" header="Last Edited" sortable>
                     <template #body="slotProps">
                         <NuxtTime v-if="slotProps.data.lastEdited" :datetime="slotProps.data.lastEdited" />

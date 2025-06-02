@@ -55,7 +55,7 @@ const complete = async () => {
                 messages: [
                     {
                         role: 'system',
-                        content: "You are an AI assistant that completes the given text. Only return the text that should follow the user's input, without repeating any of the original text.",
+                        content: "You are an AI assistant that completes the given text.",
                     },
                     {
                         role: 'user',

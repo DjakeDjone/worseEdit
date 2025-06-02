@@ -1,4 +1,4 @@
-import { type Doc, type DocMeta } from "~/server/model/doc";
+import { DEFAULT_DOC, type Doc, type DocMeta } from "~/server/model/doc";
 import type { FileMeta } from "~/server/model/folder"
 import type { Permission } from "~/server/model/permission";
 import type { User } from "~/server/model/user"
@@ -42,10 +42,22 @@ export const useDocHelper = () => {
         return res;
     }
 
+    const getDoc = async (id: string) => {
+        if (!import.meta.client) {
+            return DEFAULT_DOC;
+        }
+        const res = await useNuxtApp().$api<Doc>("/api/editor/" + id, {
+            method: "GET",
+            credentials: "include",
+        });
+        return res;
+    }
+
     return {
         createDoc,
         deleteDoc,
         shareDoc,
-        acceptShareLink
+        acceptShareLink,
+        getDoc,
     }
 }

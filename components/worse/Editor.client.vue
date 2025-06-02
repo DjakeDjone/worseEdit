@@ -23,6 +23,9 @@ import TextStyle from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
 import { convertToMarkdown, convertToMarkdownWithTags } from "~/util/htmlToMd";
 
+// auto focus
+import { useFocus } from '@vueuse/core'
+
 
 
 
@@ -133,6 +136,7 @@ const completionNode = Node.create({
     },
 })
 
+const editorRef = shallowRef('editorRef')
 const modelValue = defineModel()
 const props = defineProps({
     fileName: {
@@ -146,9 +150,10 @@ const props = defineProps({
             color: '#000000',
             id: Math.floor(Math.random() * 100)
         })
-    }
+    },
 })
 const emit = defineEmits(['change']);
+const worseDoc = defineModel("worseDoc");
 
 const scale = ref(1);
 const showDiff = ref(false);
@@ -230,7 +235,6 @@ const editor = useEditor({
 });
 
 
-
 onBeforeUnmount(() => {
     try {
 
@@ -292,7 +296,7 @@ const tabsCompact = ref(false);
                         <WorseHeaderInsert :editor="editor" :fileName="props.fileName" />
                     </TabPanel>
                     <TabPanel value="2">
-                        <WorseHeaderLayout :editor="editor" :fileName="props.fileName" />
+                        <WorseHeaderLayout :settings="props.worseDoc.settings" :editor="editor" :fileName="props.fileName" />
                     </TabPanel>
                     <TabPanel value="3">
                         <WorseHeaderView :editor="editor" :fileName="props.fileName" v-model:show-diff="showDiff" />
@@ -334,7 +338,7 @@ const tabsCompact = ref(false);
         </div>
         <div class="sticky bottom-0 z-50 backdrop-blur-md">
             <slot name="bottomNav" v-if="editor">
-                <WorseFooter :editor="editor" :fileName="props.fileName" v-model:scale="scale" />
+                <WorseFooter focus :editor="editor" :fileName="props.fileName" v-model:scale="scale" />
             </slot>
         </div>
     </div>

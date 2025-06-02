@@ -23,6 +23,7 @@ export const useDocsHandler = () => {
                 content: "",
                 users: [],
                 public: true,
+                settings: {}
             });
             newDoc.id = "public";
             await db.setItem(tableName + ":public", newDoc);
@@ -63,6 +64,7 @@ export const useDocsHandler = () => {
             ...doc,
             content: "<h1>Worse Doc</h1>",
             users: [],
+            settings: {},
         } as DocData
         const newDoc: Doc = generateDbEntry<DocData>(id, newBaseDoc);
         if (owner) {

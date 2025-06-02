@@ -3,11 +3,21 @@ import { fakeUser, toYUser } from "@/server/model/user";
 
 const { user } = useUserHandler();
 
+const { getDoc } = useDocHelper();
+
+
 const content = ref("<h1>Worse</h1><p>The better Editor! 🎉</p>");
 const route = useRoute();
 const fileName = computed(() => {
     return route.params.id ? `${route.params.id}` : "public";
 });
+
+// const doc = getDoc(fileName.value);
+const { data:doc } = useAsyncData('doc', () => getDoc(fileName.value), {
+    lazy: true,
+    watch: [fileName],
+});
+
 
 </script>
 
@@ -27,7 +37,7 @@ const fileName = computed(() => {
         
         <div class="rounded-lg md:p-4 bg-white shadow-sm">
             <ClientOnly>
-                <WorseEditor v-model="content" :fileName="fileName" :user="toYUser(user?user:fakeUser)" />
+                <WorseEditor v-model:worseDoc="doc" v-model="content" :fileName="fileName" :user="toYUser(user?user:fakeUser)" />
             </ClientOnly>
         </div>
     </main>

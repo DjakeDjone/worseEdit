@@ -54,7 +54,7 @@ export const beautifulColorFromName = (name: string) => {
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
-export const toYUser = (user: User) => {
+export const toYUser = (user: FrontendUser) => {
     return {
         name: user.name,
         color: beautifulColorFromName(user.name),

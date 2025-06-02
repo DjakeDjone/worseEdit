@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { convertDbEntryFromApi } from '~/server/model/dbEntry'
+import { type FrontendUser, type User } from '~/server/model/user'
+
 
 const loginForm = reactive({
     username: '',
@@ -6,6 +9,8 @@ const loginForm = reactive({
 })
 
 const error = ref('')
+const { user } = useUserHandler()
+
 
 const login = async () => {
     error.value = ''
@@ -18,6 +23,9 @@ const login = async () => {
 
         if (data.value) {
             console.log('Login successful:', data.value)
+            user.value = convertDbEntryFromApi<FrontendUser>(data.value);
+            // redirect
+            useRouter().push('/')
         } else {
             error.value = 'Login failed. Please check your credentials.'
         }
@@ -41,7 +49,7 @@ const login = async () => {
                 Please enter your user ID and token to log in.
             </template>
             <template #content>
-                <Form class="flex flex-col gap-6 mt-4" @submit.prevent="login">
+                <Form class="flex flex-col gap-6 mt-4" @submit="login">
                     <FloatLabel>
                         <label for="id">Username:</label>
                         <InputText id="id" v-model="loginForm.username" required fluid />

@@ -1,5 +1,5 @@
 import { useStorage } from '@vueuse/core'
-import type { User } from '~/server/model/user'
+import type { FrontendUser, User } from '~/server/model/user'
 
 export const useUserHandler = () => {
     const user = useStorage("user", {
@@ -7,7 +7,7 @@ export const useUserHandler = () => {
         name: "",
         createdAt: new Date(),
         updatedAt: new Date(),
-    } as User)
+    } as FrontendUser)
 
     const loadMe = async () => {
         const res = await useNuxtApp().$api<User>("/api/user/getUser", {
@@ -22,9 +22,8 @@ export const useUserHandler = () => {
         }
     }
 
-
     return {
         user,
-        loadMe,
+        loadMe
     }
 }

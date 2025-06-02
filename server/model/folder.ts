@@ -20,7 +20,7 @@ export type FileMeta = {
     description?: string;
     permissions: PermissionData[];
     fileId: string;
-    lastEdited?: Date; // optional, for sorting
+    lastEdited?: Date | string; // optional, for sorting
 }
 
 export const generateFileMeta = (file: Doc) => {

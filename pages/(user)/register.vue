@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { convertDbEntryFromApi } from '~/server/model/dbEntry';
+import type { FrontendUser } from '~/server/model/user';
+
 
 const registerForm = reactive({
     username: '',
@@ -19,7 +22,7 @@ const register = async () => {
 
         if (data.value) {
             console.log('Registration successful:', data.value);
-            user.value = data.value;
+            user.value = convertDbEntryFromApi<FrontendUser>(data.value);
             // redirect
             useRouter().push('/')
         } else {            
