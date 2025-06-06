@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Ollama } from 'ollama/browser';
+import type { ShallowRef } from 'vue';
+import { Editor, EditorContent, BubbleMenu } from '@tiptap/vue-3'
+
 
 const props = defineProps({
     editor: {
-        type: Object,
+        type: Object as () => Editor,
         required: true,
     },
     fileName: {
@@ -18,7 +21,7 @@ const props = defineProps({
 
 const ops = ref({
     provider: 'ollama',
-    model: 'gemma3:1b-it-qat',
+    model: 'gemma3:latest',
     baseUrl: 'http://127.0.0.1:11434',
 });
 
@@ -33,12 +36,13 @@ const complete = async () => {
     status.value = 'loading';
     streamResponse.value = '';
     try {
-        
+        const aiPromptContextLength = 300; // number of characters to consider for AI completion
         // get the 12 lines before the cursor
         const cursor = props.editor.state.selection.$from;
-        const start = Math.max(0, cursor.pos - 120);
+        const start = Math.max(0, cursor.pos - aiPromptContextLength);
         const end = Math.min(props.editor.state.doc.content.size, cursor.pos);
-        const text = props.editor.state.doc.textBetween(start, end, ' ');
+        const text = props.editor.state.doc.textBetween(start, end, '\n');
+
         console.log('Text:', text);
         if (text.length < 1) {
             streamResponse.value = 'No text to process.';
@@ -55,20 +59,26 @@ const complete = async () => {
                 messages: [
                     {
                         role: 'system',
-                        content: "You are an AI assistant that completes the given text.",
+                        content: "You are an AI assistant that completes the given text. Don't repeat the text, just complete it.",
                     },
                     {
                         role: 'user',
                         content: text,
                     },
                 ],
+                think: false,
                 stream: true,
             });
             for await (const part of responseStream) {
                 streamResponse.value += part.message.content;
                 // insert the response at the cursor position
-                props.editor.commands.setCompletion(
-                    streamResponse.value,
+                // props.editor.commands.setCompletion(
+                //     streamResponse.value,
+                // );
+                //
+                props.editor.commands.insertContentAt(
+                    props.editor.state.selection.from,
+                    part.message.content,
                 );
             }
             // props.editor.commands.setCompletion(

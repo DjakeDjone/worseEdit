@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import "@/assets/editor.css"
-import { Node, mergeAttributes } from '@tiptap/core'
-import { Editor, EditorContent, BubbleMenu } from '@tiptap/vue-3'
+import { Node, mergeAttributes, type Commands, type RawCommands, Editor } from '@tiptap/vue-3'
+import { EditorContent, BubbleMenu } from '@tiptap/vue-3'
 import { Image } from '@tiptap/extension-image'
 import { ImageResize } from 'tiptap-extension-resize-image';
 import { Collaboration } from '@tiptap/extension-collaboration'
@@ -68,10 +68,10 @@ const PageBreakNode = Node.create({
 
     addCommands() {
         return {
-            setPageBreak: () => ({ commands }) => {
+            setPageBreak: () => ({ commands }: { commands: RawCommands }) => {
                 return commands.insertContent({ type: this.name })
             },
-        }
+        } as Partial<RawCommands>
     },
 })
 
@@ -87,10 +87,8 @@ const completionNode = Node.create({
         return {
             text: {
                 default: '',
-                parseHTML: element => element.getAttribute('data-completion-text') || element.innerText,
-                renderHTML: attributes => {
-                    // This attribute is mainly for data persistence in HTML.
-                    // The actual display is handled by the node's renderHTML.
+                parseHTML: (element: { getAttribute: (arg0: string) => any; innerText: any; }) => element.getAttribute('data-completion-text') || element.innerText,
+                renderHTML: (attributes: { text: string }) => {
                     return { 'data-completion-text': attributes.text };
                 },
             },
@@ -105,13 +103,13 @@ const completionNode = Node.create({
         ];
     },
 
-    renderHTML({ node, HTMLAttributes }) {
+    renderHTML({ node, HTMLAttributes }: { node: any, HTMLAttributes: Record<string, any> }) {
         return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'completion' }), node.attrs.text || ''];
     },
 
     addCommands() {
         return {
-            setCompletion: (text) => ({ commands, editor }) => {
+            setCompletion: (text: string) => ({ commands, editor }: { commands: RawCommands, editor: Editor }) => {
                 if (!editor) {
                     console.warn('Editor instance is not available.');
                     return false;
@@ -125,18 +123,19 @@ const completionNode = Node.create({
                     });
                 }
             },
-        };
+        } as Partial<RawCommands>;
     },
 
     addKeyboardShortcuts() {
         return {
             // Mod-Enter will insert/update an empty completion block at the current position.
-            'Mod-Enter': () => this.editor.commands.setCompletion(''),
+            'Mod-Enter': () => (this.editor.commands as any).setCompletion(''),
+            'Enter': () => (this.editor.commands as any).setCompletion(''),
         };
     },
 })
 
-const editorRef = shallowRef('editorRef')
+const editorRef = shallowRef<Editor | undefined>()
 const modelValue = defineModel()
 const props = defineProps({
     fileName: {
@@ -163,7 +162,7 @@ const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'; // TODO
 const provider = new WebsocketProvider(`${protocol}//${location.host}/api/editor/live`, props.fileName, doc)
 // const provider = new WebsocketProvider(`ws://localhost:1234`, 'init', doc)
 
-provider.on('status', (event) => {
+provider.on('status', (event: any) => {
     if (event.status === 'disconnected') {
         // check if it was a disconnection or an error
         if (event.error) {
@@ -186,10 +185,10 @@ const editor = useEditor({
             history: false,
         }),
         CharacterCount.configure({
-            limit: this.limit,
+            limit: null,
         }),
         Color,
-        BubbleMenu,
+        // BubbleMenu, // Removed from extensions
         Highlight.configure({ multicolor: true }),
         Underline,
         TaskList,
@@ -234,12 +233,15 @@ const editor = useEditor({
     },
 });
 
+watch(editor, (newEditor) => {
+    editorRef.value = newEditor;
+});
 
 onBeforeUnmount(() => {
     try {
-
-        if (editor) {
-            unref(editor).destroy();
+        const currentEditor = unref(editor);
+        if (currentEditor) {
+            currentEditor.destroy();
         }
         if (provider) {
             unref(provider).destroy();
@@ -296,13 +298,13 @@ const tabsCompact = ref(false);
                         <WorseHeaderInsert :editor="editor" :fileName="props.fileName" />
                     </TabPanel>
                     <TabPanel value="2">
-                        <WorseHeaderLayout :settings="props.worseDoc.settings" :editor="editor" :fileName="props.fileName" />
+                        <!-- <WorseHeaderLayout :settings="props.worseDoc.settings" :editor="editor" :fileName="props.fileName" /> -->
                     </TabPanel>
                     <TabPanel value="3">
                         <WorseHeaderView :editor="editor" :fileName="props.fileName" v-model:show-diff="showDiff" />
                     </TabPanel>
                     <TabPanel value="4">
-                        <WorseHeaderAi :editor="editor" :fileName="props.fileName" />
+                        <WorseHeaderAi v-if="editorRef" :editor="editorRef" :fileName="props.fileName" />
                     </TabPanel>
                 </TabPanels>
             </Tabs>
