@@ -32,7 +32,9 @@ const deleteFile = async (id: string) => {
     <div>
         <div class="mb-4">
             <h2 class="text-lg font-semibold mb-2">
-                Recent Files
+                <slot name="header">>
+                    Recent Files
+                </slot>
             </h2>
             <DataTable :value="recentFiles" stripedRows showGridlines resizableColumns columnResizeMode="fit">
                 <Column field="name" header="Name" sortable frozen>

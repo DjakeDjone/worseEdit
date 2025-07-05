@@ -88,7 +88,7 @@ const handleClickOutside = (event: Event) => {
                 <div v-if="pathItems.length > 0" class="flex items-center">
                     <div v-for="(item, index) in pathItems" :key="index" class="flex items-center">
                         <span 
-                            class="hover:text-blue-500 cursor-pointer px-1 py-0.5 rounded hover:bg-blue-50"
+                            class="hover:text-blue-500 cursor-pointer px-1 rounded hover:bg-blue-50"
                             @click.stop="currentPath = item.path"
                         >
                             {{ item.label }}
