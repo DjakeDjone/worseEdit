@@ -3,14 +3,15 @@ import { useUsersHandler } from "~/server/util/usersHandler";
 
 export default defineEventHandler(async (event) => {
     const { username, token } = await readBody(event);
-    const { getUserByName } = useUsersHandler();
-    const user = await getUserByName(username, token);
-    if (!user) {
+    const { getUserByName,setAuthentificated } = useUsersHandler();
+    const newUser = await getUserByName(username, token);
+    if (!newUser) {
         throw createError({
             statusCode: 401,
             statusMessage: "Unauthorized",
             message: "Invalid token",
         });
     }
-    return fromUser(user);
+    await setAuthentificated(event, newUser);
+    return fromUser(newUser);
 });
