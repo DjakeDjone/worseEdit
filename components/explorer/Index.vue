@@ -12,11 +12,11 @@ const docHandler = useDocHelper();
 
 const currentPath = ref<string>('');
 
-const reload = async() => {
+const reload = async () => {
     currentPath.value = '';
     try {
         await loadMe();
-        
+
     } catch (error) {
         console.error('Failed to load user:', error);
         useRouter().push('/login');
@@ -31,6 +31,8 @@ const onDelete = async (id: string) => {
         currentPath.value = currentPath.value.split('/').filter(part => part !== id).join('/');
     }
 };
+
+const tab = ref('recent');
 
 </script>
 
@@ -47,13 +49,37 @@ const onDelete = async (id: string) => {
                 </Button>
             </div>
         </div>
-        <slot name="recentFiles">
+        <!-- <slot name="recentFiles">
             <ExplorerRecent @delete="onDelete" />
-        </slot>
-        <ExplorerViewBreadcrumb v-model:currentPath="currentPath" />
-        <div class="rounded-lg p-4 bg-background-50/10 backdrop-blur-2xl">
-            <ExplorerViewFolder v-for="folder, i in splitExplorer(user)" :key="folder.name" :folder="folder" :index="i"
-                @delete="onDelete($event)" v-model:currentPath="currentPath" />
+        </slot> -->
+        <div class="flex gap-4 bg-background-50 p-4 rounded-lg">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="font-bold">Files</h2>
+                </div>
+                <ul class="*:flex *:items-center *:gap-2 *:cursor-pointer">
+                    <li @click="tab = 'recent'" :class="{ 'text-blue-500': tab === 'recent' }">
+                        <Icon name="mdi:recent" />
+                        Recent
+                    </li>
+                    <li @click="tab = 'documents'" :class="{ 'text-blue-500': tab === 'documents' }">
+                        <Icon name="mdi:folder" />
+                        Documents
+                    </li>
+                </ul>
+            </div>
+            <div v-auto-animate class="bg-white w-full rounded-lg shadow-sm p-2">
+                <div v-if="tab === 'documents'">
+                    <ExplorerViewBreadcrumb v-model:currentPath="currentPath" />
+                    <div class="rounded-lg p-4 min-h-[20rem]">
+                        <ExplorerViewFolder v-for="folder, i in splitExplorer(user)" :key="folder.name" :folder="folder"
+                            :index="i" @delete="onDelete($event)" v-model:currentPath="currentPath" />
+                    </div>
+                </div>
+                <div v-else-if="tab === 'recent'">
+                    <ExplorerRecent @delete="onDelete" />
+                </div>
+            </div>
         </div>
     </div>
 </template>

@@ -1,5 +1,5 @@
 import type { FileMeta } from "~/server/model/folder";
-import type { User } from "~/server/model/user";
+import type { FrontendUser, User } from "~/server/model/user";
 
 export type Folder = {
     id: string;
@@ -9,7 +9,7 @@ export type Folder = {
     files: FileMeta[];
 }
 
-export const splitExplorer = (user: User) => {
+export const splitExplorer = (user: FrontendUser) => {
     let folders: Folder[] = [];
     let currentFolder: Folder | undefined = undefined;
 

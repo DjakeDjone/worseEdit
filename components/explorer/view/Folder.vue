@@ -38,10 +38,10 @@ watch(() => currentPath, (newPath) => {
 
 <template>
     <div v-auto-animate class="w-full">
-        <h3 class="underline cursor-pointer flex items-center gap-1"
+        <h3 class="underline cursor-pointer flex items-center gap-2 text-primary-500 hover:text-blue-500"
             :class="{ 'text-blue-500': currentPath === folder.path }"
             @click="currentPath = folder.path; opened = !opened">
-            <Icon name="line-md:folder-filled" class="" />
+            <Icon name="line-md:folder-filled" class="" size="20" />
             <span>
                 {{ folder.name }}
             </span>
