@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import "@/assets/editor.css"
+import "@/assets/prose-fix.css"
 import { Node, mergeAttributes, type Commands, type RawCommands, Editor } from '@tiptap/vue-3'
 import { EditorContent, BubbleMenu } from '@tiptap/vue-3'
 import { Image } from '@tiptap/extension-image'
@@ -317,7 +318,7 @@ const tabsCompact = ref(false);
                     </div>
                 </template>
                 <template #content>
-                    <TiptapEditorContent :editor="editor" class="scheme-light prose prose-editor max-w-[100vw] *:w-full" />
+                    <TiptapEditorContent :editor="editor" class="prose prose-editor max-w-[100vw] *:w-full" />
                 </template>
             </Card>
             <div class="transition-all w-0" :class="{ 'w-[calc(793px)]': showDiff }">

@@ -35,7 +35,7 @@ const { data:doc } = useAsyncData('doc', () => getDoc(fileName.value), {
         </div>
 
         
-        <div class="rounded-lg md:p-4 bg-white shadow-sm">
+        <div class="rounded-lg md:p-4 shadow-sm">
             <ClientOnly>
                 <WorseEditor v-model:worseDoc="doc" v-model="content" :fileName="fileName" :user="toYUser(user?user:fakeUser)" />
             </ClientOnly>

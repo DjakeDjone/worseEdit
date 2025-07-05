@@ -8,6 +8,7 @@
 
 /* tailwind css v4.x (animations */
 @import "tailwindcss-intersect";
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 
 /* Tailwind custom vars */

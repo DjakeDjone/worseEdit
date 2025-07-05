@@ -1,5 +1,6 @@
 <template>
-    <div class="w-full h-16 p-2 bg-gray-100 border-b border-gray-300">
+    <div class="w-full h-16 p-2  border-b border-gray-300">
+        <!-- bg-gray-100 -->
         <div class="flex items-center gap-2">
             <slot></slot>
         </div>
