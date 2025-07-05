@@ -317,7 +317,7 @@ const tabsCompact = ref(false);
                     </div>
                 </template>
                 <template #content>
-                    <TiptapEditorContent :editor="editor" class="prose prose-editor max-w-[100vw] *:w-full" />
+                    <TiptapEditorContent :editor="editor" class="scheme-light prose prose-editor max-w-[100vw] *:w-full" />
                 </template>
             </Card>
             <div class="transition-all w-0" :class="{ 'w-[calc(793px)]': showDiff }">
