@@ -10,6 +10,7 @@ const fileName = ref("worse");
 
 <template>
     <main class="mx-auto p-4">
+        <UiColorSchemeToggle />
         <div class="mb-4 flex gap-7 flex-col">
             <WorseLogo>WORSE</WorseLogo>
             <p class="">A worse editor for your documents. <br>It may be not the best editor,

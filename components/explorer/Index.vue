@@ -42,7 +42,7 @@ const reloadAnimation = ref(false);
 <template>
     <div class="relative w-[min(44rem,calc(100vw-2rem))]
      resize-x overflow-y-auto h-full flex flex-col md:flex-row gap-4 bg-background-50 shadow-sm p-4 rounded-lg
-      dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200
+      border border-gray-400/20 dark:bg-gray-800 dark:text-gray-200
      ">
         <div id="reload" class="absolute top-0 left-0 w-full h-full z-50 flex items-center justify-center"
             v-if="reloadAnimation">
