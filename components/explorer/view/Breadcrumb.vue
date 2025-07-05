@@ -68,7 +68,7 @@ const handleClickOutside = (event: Event) => {
 
 <template>
     <div>
-        <div class="flex items-center border p-1 rounded bg-gray-50">
+        <div class="flex items-center border p-1 rounded bg-background-100">
             <!-- Editing mode -->
             <div v-if="isEditing" class="flex items-center w-full">
                 <span class="text-gray-600 mr-1">~</span>

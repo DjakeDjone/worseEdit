@@ -10,15 +10,15 @@ const fileName = ref("worse");
 
 <template>
     <main class="mx-auto p-4">
-        <div class="mb-4 prose">
+        <div class="mb-4 flex gap-7 flex-col">
             <WorseLogo>WORSE</WorseLogo>
-            <p class="text-gray-600">A worse editor for your documents. It may be not the best editor,
+            <p class="">A worse editor for your documents. <br>It may be not the best editor,
                 but it is surely not the worst. <br>
                 <NuxtLink to="about" class="text-red-500">
                     Or is it? 🤔
                 </NuxtLink>
             </p>
-            <h2 class="text-xl">Welcome {{ user ? user.name : 'Developer' }}!</h2>
+            <h2 class="text-2xl">Welcome {{ user ? user.name : 'Developer' }}!</h2>
         </div>
 
         <section>

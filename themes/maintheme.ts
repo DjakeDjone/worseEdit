@@ -74,6 +74,6 @@ const MainTheme = definePreset(Aura, {
 export default {
     preset: MainTheme,
     options: {
-        darkModeSelector: false,
+        darkModeSelector: '.dark',
     }
 };
