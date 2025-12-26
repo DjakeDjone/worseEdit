@@ -44,24 +44,26 @@ const reloadAnimation = ref(false);
      resize-x overflow-y-auto h-full flex flex-col md:flex-row gap-4 bg-background-50 shadow-sm p-4 rounded-lg
       border border-gray-400/20 dark:bg-gray-800 dark:text-gray-200
      ">
-        <div id="reload" class="absolute top-0 left-0 w-full h-full z-50 flex items-center justify-center"
-            v-if="reloadAnimation">
-            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
+        <div v-if="reloadAnimation"
+            class="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-gray-900/50">
+            <ProgressSpinner />
         </div>
         <div>
             <div class="flex items-center justify-between mb-2">
                 <h2 class="font-bold text-lg">WORSE-Files</h2>
             </div>
-            <ul class="*:flex *:items-center *:gap-2 *:cursor-pointer">
-                <li @click="tab = 'recent'" :class="{ 'text-blue-500': tab === 'recent' }">
-                    <Icon name="mdi:recent" />
-                    Recent
-                </li>
-                <li @click="tab = 'documents'" :class="{ 'text-blue-500': tab === 'documents' }">
-                    <Icon name="mdi:folder" />
-                    Documents
-                </li>
-            </ul>
+            <Tabs v-model:value="tab">
+                <TabList>
+                    <Tab value="recent">
+                        <Icon name="mdi:recent" class="mr-1" />
+                        Recent
+                    </Tab>
+                    <Tab value="documents">
+                        <Icon name="mdi:folder" class="mr-1" />
+                        Documents
+                    </Tab>
+                </TabList>
+            </Tabs>
         </div>
         <div v-auto-animate class="w-full rounded-lg p-2 md:p-4 flex-1 dark:bg-gray-900 dark:text-gray-200">
             <div v-if="tab === 'documents'">

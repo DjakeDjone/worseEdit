@@ -9,7 +9,7 @@ export default defineNuxtConfig({
   //   pageTransition: { name: 'page', mode: 'out-in' }
   // },
   modules: [// '@nuxtjs/tailwindcss',
-  '@vueuse/nuxt', '@formkit/auto-animate', '@primevue/nuxt-module', 'nuxt-tiptap-editor', '@nuxt/icon', 'nuxt-time', '@nuxtjs/color-mode'],
+  '@sidebase/nuxt-auth', '@vueuse/nuxt', '@formkit/auto-animate', '@primevue/nuxt-module', 'nuxt-tiptap-editor', '@nuxt/icon', 'nuxt-time', '@nuxtjs/color-mode'],
   colorMode: {
     preference: 'system', // default value of $colorMode.preference
     fallback: 'light', // fallback value if not system preference found

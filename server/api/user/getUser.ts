@@ -1,27 +1,39 @@
-import { useUsersHandler } from "~/server/util/usersHandler";
-import { getCookie } from 'h3'; // Assuming you're using cookies for auth tokens
-import { fromUser } from "~/server/model/user";
+import { getServerSession } from '#auth'
+import { useUsersHandler } from '~/server/util/usersHandler'
+import { fromUser } from '~/server/model/user'
+
 
 export default defineEventHandler(async (event) => {
-
-    const { getUserByCookie } = useUsersHandler(); // We'll need to add getUserByToken to userHandler
-
+    const { getUserByEmail, createUserFromOAuth, setAuthentificated, getUserByCookie } = useUsersHandler();
+    
+    // Check for NextAuth session first (GitHub OAuth)
+    const session = await getServerSession(event);
+    
+    if (session?.user?.email) {
+        // User is authenticated via GitHub OAuth
+        // Create or get user from our custom system
+        const customUser = await createUserFromOAuth(
+            session.user.email,
+            session.user.name || session.user.email.split('@')[0]
+        );
+        
+        // Set the custom auth-token cookie for compatibility with existing system
+        await setAuthentificated(event, customUser);
+        
+        // Return the user data
+        return fromUser(customUser);
+    }
+    
+    // Fall back to custom cookie-based auth
     try {
         const user = await getUserByCookie(event);
         if (!user) {
-            throw createError({
-                statusCode: 404,
-                statusMessage: "Not Found",
-                message: "User not found or token invalid",
-            });
+            // Not authenticated - return null instead of throwing
+            return null;
         }
-        // Return only non-sensitive user data
         return fromUser(user);
     } catch (error: any) {
-        throw createError({
-                statusCode: 404,
-                statusMessage: "Not Found",
-                message: "User not found or token invalid",
-            });
+        // Error checking auth - return null
+        return null;
     }
 });

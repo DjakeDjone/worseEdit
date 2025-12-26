@@ -13,7 +13,7 @@ const fileName = computed(() => {
 });
 
 // const doc = getDoc(fileName.value);
-const { data:doc } = useAsyncData('doc', () => getDoc(fileName.value), {
+const { data: doc } = useAsyncData('doc', () => getDoc(fileName.value), {
     lazy: true,
     watch: [fileName],
 });
@@ -22,23 +22,14 @@ const { data:doc } = useAsyncData('doc', () => getDoc(fileName.value), {
 </script>
 
 <template>
-    <main class="mx-auto p-4">
-        <div class="mb-4 flex items-center justify-between">
-            <WorseLogo>
-                
-            </WorseLogo>
-            <h2 class="text-xl">User 
-                <span class="bg-green-200">
-                    {{ user ? user.name : 'Developer' }}
-                </span>
-            </h2>
-        </div>
-
-        
-        <div class="rounded-lg md:p-4 shadow-sm">
-            <ClientOnly>
-                <WorseEditor v-model:worseDoc="doc" v-model="content" :fileName="fileName" :user="toYUser(user?user:fakeUser)" />
-            </ClientOnly>
+    <main class="mx-auto">
+        <div class="">
+            <div class="rounded-lg shadow-sm">
+                <ClientOnly>
+                    <WorseEditor v-model:worseDoc="doc" v-model="content" :fileName="fileName"
+                        :user="toYUser(user ? user : fakeUser)" />
+                </ClientOnly>
+            </div>
         </div>
     </main>
 </template>

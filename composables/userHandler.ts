@@ -10,20 +10,33 @@ export const useUserHandler = () => {
     } as FrontendUser)
 
     const loadMe = async () => {
-        const res = await useNuxtApp().$api<User>("/api/user/getUser", {
-            method: "GET",
-            credentials: "include",
-        });
+        try {
+            const res = await useNuxtApp().$api<User>("/api/user/getUser", {
+                method: "GET",
+                credentials: "include",
+            });
 
-        if (res) {
-            user.value = res;
-        } else {
-            console.warn("Failed to load user data");
+            if (res) {
+                user.value = res;
+            }
+        } catch (error) {
+            // Silently handle - user is not authenticated
+            console.debug("User not authenticated");
+        }
+    }
+
+    const logout = () => {
+        user.value = {
+            id: "",
+            name: "",
+            createdAt: new Date(),
+            updatedAt: new Date(),
         }
     }
 
     return {
         user,
-        loadMe
+        loadMe,
+        logout
     }
 }

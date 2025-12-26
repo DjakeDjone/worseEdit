@@ -1,0 +1,13 @@
+{
+    "servers": {
+        "primevue": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@primevue/mcp"
+            ],
+            "type": "stdio"
+        },
+    },
+    "inputs": []
+}

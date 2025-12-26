@@ -11,7 +11,9 @@ export type AuthToken = {
 
 export type UserData = {
     name: string;
-    token: string;
+    email?: string;
+    password?: string;
+    token?: string;
     authTokens?: AuthToken[];
     // !folder is redundant!
     // folderIds?: string[];
@@ -19,6 +21,7 @@ export type UserData = {
     // inviteFiles?: InvitionFileMeta[];
 
 }
+
 
 export type User = UserData & DbEntry;
 

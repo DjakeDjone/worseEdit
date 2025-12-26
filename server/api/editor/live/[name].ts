@@ -132,18 +132,49 @@ export class WSSharedDoc extends Y.Doc {
         try {
             const persistedContentBase64 = await initialContentLoader(this.name);
             if (persistedContentBase64 && persistedContentBase64.length > 0) {
+                // Check if the content looks like HTML (not base64-encoded Yjs data)
+                // New documents are created with HTML like "<h1>Worse Doc</h1>"
+                // which should be ignored - the editor will initialize with empty Yjs state
+                if (persistedContentBase64.startsWith('<') || 
+                    persistedContentBase64.startsWith('{') ||
+                    /^[a-zA-Z]/.test(persistedContentBase64)) {
+                    // This looks like raw text/HTML, not base64-encoded binary data
+                    // The client-side editor will handle initializing with default content
+                    console.log(`[ws persist] Doc ${this.name} has non-Yjs content (possibly HTML), starting with empty Yjs state`);
+                    return;
+                }
+
                 const contentUpdate = Buffer.from(persistedContentBase64, 'base64');
-                // Apply update with 'load' origin to prevent immediate re-saving
-                Y.applyUpdateV2(this, contentUpdate, 'load');
-                console.log(`[ws persist] Loaded persisted state for doc ${this.name}`);
+                
+                // Validate that we have actual data to decode
+                if (contentUpdate.length === 0) {
+                    console.warn(`[ws persist] Empty content buffer for doc ${this.name}, starting fresh`);
+                    return;
+                }
+                
+                // Try V2 first, then fallback to V1 if V2 fails
+                try {
+                    Y.applyUpdateV2(this, contentUpdate, 'load');
+                    console.log(`[ws persist] Loaded persisted state for doc ${this.name} (V2 format)`);
+                } catch (v2Error) {
+                    console.warn(`[ws persist] V2 decode failed for doc ${this.name}, trying V1 format...`);
+                    try {
+                        Y.applyUpdate(this, contentUpdate, 'load');
+                        console.log(`[ws persist] Loaded persisted state for doc ${this.name} (V1 format)`);
+                    } catch (v1Error) {
+                        console.error(`[ws persist] Both V2 and V1 decode failed for doc ${this.name}. Data may be corrupted.`);
+                        console.error(`[ws persist] V2 error:`, v2Error);
+                        console.error(`[ws persist] V1 error:`, v1Error);
+                        // Document will start fresh
+                    }
+                }
             }
             // If content is null or empty, doc remains new/empty, which is fine.
         } catch (e: any) {
-            // This catch is for unexpected errors during the loading process itself (e.g., Y.applyUpdateV2 failure)
+            // This catch is for unexpected errors during the loading process itself (e.g., network issues)
             // The initialContentLoader should handle its own errors (like fetch failures).
-            console.error(`[ws persist] Error applying persisted state for doc ${this.name}:`, e);
-            // Depending on desired behavior, this could re-throw or just log.
-            // For now, it logs, and the promise resolves, allowing the app to proceed with a potentially empty doc.
+            console.error(`[ws persist] Error loading persisted state for doc ${this.name}:`, e);
+            // Document will start fresh
         }
     }
 

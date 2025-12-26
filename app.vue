@@ -1,5 +1,6 @@
 <template>
   <div class="h-full">
+    <Toast />
     <NuxtLoadingIndicator />
     <NuxtPage></NuxtPage>
   </div>

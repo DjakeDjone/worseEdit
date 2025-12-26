@@ -131,7 +131,6 @@ const completionNode = Node.create({
         return {
             // Mod-Enter will insert/update an empty completion block at the current position.
             'Mod-Enter': () => (this.editor.commands as any).setCompletion(''),
-            'Enter': () => (this.editor.commands as any).setCompletion(''),
         };
     },
 })
@@ -283,8 +282,9 @@ const tabsCompact = ref(false);
                         <Icon name="i-heroicons-chevron-double-left-solid" class="transition-all"
                             :class="{ 'rotate-180': tabsCompact }" />
                     </Button>
-                    <div class="ml-auto">
+                    <div class="ml-auto flex gap-2 items-center">
                         <WorseHeaderShare :docId="fileName" />
+                        <WorseHeaderUserMenu compact />
                     </div>
                 </TabList>
                 <TabPanels :class="{ '!h-0': tabsCompact }" class="!p-0 overflow-hidden h-16 transition-all"
@@ -318,7 +318,8 @@ const tabsCompact = ref(false);
                     </div>
                 </template>
                 <template #content>
-                    <TiptapEditorContent :editor="editor" class="scheme-light prose prose-editor max-w-[100vw] *:w-full" />
+                    <TiptapEditorContent :editor="editor"
+                        class="scheme-light prose prose-editor max-w-[100vw] *:w-full" />
                 </template>
             </Card>
             <div class="transition-all w-0" :class="{ 'w-[calc(793px)]': showDiff }">

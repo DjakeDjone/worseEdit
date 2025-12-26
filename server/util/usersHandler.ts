@@ -56,7 +56,8 @@ export const useUsersHandler = () => {
     /// @throws Error if user already exists
     const createUser = async (user: UserData) => {
         const id = crypto.randomUUID();
-        const usr = generateDbEntry<UserData>(id, user);
+        const token = user.token || crypto.randomUUID(); // Generate token if not provided
+        const usr = generateDbEntry<UserData>(id, { ...user, token });
 
         await db.setItem(tableName + ":" + id, usr);
         usernameCache.set(usr.name, id);
@@ -206,7 +207,38 @@ export const useUsersHandler = () => {
         // return user;
     }
 
+    const getUserByEmail = async (email: string) => {
+        const userIds = await db.getKeys(tableName);
+        for (let userId of userIds) {
+            userId = userId.replace(tableName + ":", "");
+            const user = await getUserUnsafe(userId);
+            if (user && user.email === email) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    const createUserFromOAuth = async (email: string, name: string) => {
+        // Check if user already exists
+        const existingUser = await getUserByEmail(email);
+        if (existingUser) {
+            return existingUser;
+        }
+
+        // Create new user
+        const userData: UserData = {
+            name: name || email.split('@')[0], // Use email prefix if no name
+            email: email,
+            password: '', // No password for OAuth users
+            files: [],
+        };
+
+        return await createUser(userData);
+    }
+
     return {
+
         init,
         getUser,
         createUser,
@@ -214,6 +246,8 @@ export const useUsersHandler = () => {
         setAuthentificated,
         getUserByCookie,
         getUserByName,
+        getUserByEmail,
+        createUserFromOAuth,
         addFileToUser,
         getUserByCookieWs,
         removeFileFromUser,
