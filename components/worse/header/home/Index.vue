@@ -42,7 +42,7 @@ const setTransparentSelection = (transparent: boolean) => {
             { label: 'H3', command: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
             { label: 'H4', command: () => editor.chain().focus().toggleHeading({ level: 4 }).run() },
             { label: 'text', command: () => editor.chain().focus().setParagraph().run() },
-        ]" placeholder="Heading" optionLabel="label" @change="(e) => {
+        ]" placeholder="Heading" optionLabel="label" @change="(e: { value: { command: () => void; }; }) => {
             e.value.command()
         }" />
 
@@ -87,7 +87,7 @@ const setTransparentSelection = (transparent: boolean) => {
                 { label: 'Bullet List', command: () => editor.chain().focus().toggleBulletList().run() },
                 { label: 'Ordered List', command: () => editor.chain().focus().toggleOrderedList().run() },
                 { label: 'Task List', command: () => editor.chain().focus().toggleTaskList().run() },
-            ]" placeholder="List Type" optionLabel="label" @change="(e) => {
+            ]" placeholder="List Type" optionLabel="label" @change="(e: { value: { command: () => void; }; }) => {
                 e.value.command()
             }" />
     </WorseHeaderContainer>

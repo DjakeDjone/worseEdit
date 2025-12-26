@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { FileUploadUploadEvent } from 'primevue/fileupload';
 import { convertToMarkdown } from '~/util/htmlToMd';
 // import docx2html from "docx2html/lib/";
 import MarkdownIt from 'markdown-it';
@@ -77,11 +76,17 @@ const uploadFile = async (event: Event) => {
 
 <template>
     <WorseHeaderContainer>
-        <Button @click="downloadAsHTML()" v-tooltip.bottom="'Download as HTML'">
+        <NuxtLink to="/">
+            <Button v-tooltip.bottom="'Go to Home'">
+                <Icon name="mdi:home" />
+            </Button>
+        </NuxtLink>
+
+        <Button severity="secondary" @click="downloadAsHTML()" v-tooltip.bottom="'Download as HTML'">
             <Icon name="mdi:download" />
         </Button>
 
-        <Button @click="downloadAsMarkdown()" v-tooltip.bottom="'Download as Markdown'">
+        <Button severity="secondary" @click="downloadAsMarkdown()" v-tooltip.bottom="'Download as Markdown'">
             <Icon name="mdi:markdown" />
         </Button>
 

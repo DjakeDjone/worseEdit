@@ -90,14 +90,13 @@ const formatDate = (date: Date) => {
 </script>
 
 <template>
-    <main class="mx-auto max-w-3xl">
+    <main>
         <!-- Header -->
         <header class="sticky top-0 z-50 mb-8 px-4 py-3 backdrop-blur-xl border-b">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <NuxtLink to="/"
-                        class="text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 transition-colors">
-                        <i class="pi pi-arrow-left text-lg"></i>
+                    <NuxtLink to="/">
+                        <Icon name="mdi:arrow-left" size="24" />
                     </NuxtLink>
                     <h1 class="text-xl font-semibold">Account Settings</h1>
                 </div>
@@ -107,7 +106,7 @@ const formatDate = (date: Date) => {
 
         <div class="px-4 space-y-6">
             <!-- User Info Card -->
-            <Card class="!bg-surface-50 dark:!bg-surface-800/50">
+            <Card class="!bg-surface-50 dark:!bg-surface-800/50 max-w-2xl">
                 <template #title>
                     <div class="flex items-center gap-3">
                         <i class="pi pi-user text-xl text-primary"></i>
@@ -129,14 +128,14 @@ const formatDate = (date: Date) => {
                         <div class="flex items-center justify-between py-2">
                             <span class="text-surface-500 dark:text-surface-400">Member since</span>
                             <span class="font-medium">{{ user?.createdAt ? formatDate(user.createdAt) : 'Unknown'
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                 </template>
             </Card>
 
             <!-- Data Export Card -->
-            <Card class="!bg-surface-50 dark:!bg-surface-800/50">
+            <Card class="!bg-surface-50 dark:!bg-surface-800/50 max-w-2xl">
                 <template #title>
                     <div class="flex items-center gap-3">
                         <i class="pi pi-download text-xl text-primary"></i>
@@ -153,7 +152,7 @@ const formatDate = (date: Date) => {
             </Card>
 
             <!-- Danger Zone -->
-            <Card class="!border-red-500/30 !bg-red-50 dark:!bg-red-900/10">
+            <Card class="!border-red-500/30 !bg-red-50 dark:!bg-red-900/10 max-w-2xl">
                 <template #title>
                     <div class="flex items-center gap-3">
                         <i class="pi pi-exclamation-triangle text-xl text-red-500"></i>
