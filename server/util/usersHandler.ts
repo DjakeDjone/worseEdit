@@ -237,6 +237,17 @@ export const useUsersHandler = () => {
         return await createUser(userData);
     }
 
+    const deleteUser = async (userId: string) => {
+        const user = await getUserUnsafe(userId);
+        if (!user) {
+            throw new Error("User not found");
+        }
+        // Remove from cache
+        usernameCache.delete(user.name);
+        // Delete from database
+        await db.removeItem(tableName + ":" + userId);
+    }
+
     return {
 
         init,
@@ -254,5 +265,6 @@ export const useUsersHandler = () => {
         inviteUserToDoc,
         getUserUnsafe, // careful with this, it does not check token
         validateUserByToken,
+        deleteUser,
     }
 };

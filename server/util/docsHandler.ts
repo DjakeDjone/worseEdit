@@ -187,6 +187,35 @@ export const useDocsHandler = () => {
         return doc;
     }
 
+    const getUserDocs = async (userId: string) => {
+        const user = await userHandler.getUserUnsafe(userId);
+        if (!user || !user.files) {
+            return [];
+        }
+        const docs: Doc[] = [];
+        for (const file of user.files) {
+            const doc = await getDoc(file.fileId);
+            if (doc) {
+                docs.push(doc);
+            }
+        }
+        return docs;
+    }
+
+    const deleteUserDocs = async (userId: string) => {
+        const user = await userHandler.getUserUnsafe(userId);
+        if (!user || !user.files) {
+            return;
+        }
+        for (const file of user.files) {
+            try {
+                await db.removeItem(tableName + ":" + file.fileId);
+            } catch (e) {
+                console.error(`Failed to delete doc ${file.fileId}:`, e);
+            }
+        }
+    }
+
 
     return {
         init,
@@ -198,5 +227,7 @@ export const useDocsHandler = () => {
         deleteDoc,
         inviteUserToDoc,
         acceptUserInvite,
+        getUserDocs,
+        deleteUserDocs,
     }
 }

@@ -88,6 +88,11 @@ const menuItems = computed(() => [
         command: () => navigateTo('/')
     },
     {
+        label: 'Account Settings',
+        icon: 'pi pi-cog',
+        command: () => navigateTo('/account')
+    },
+    {
         separator: true
     },
     {
